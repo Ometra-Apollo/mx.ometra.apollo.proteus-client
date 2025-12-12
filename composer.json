@@ -1,0 +1,29 @@
+{
+    "name": "apollo/proteus-client",
+    "description": "Proteus API adapter",
+    "version": "1.0.0",
+    "type": "library",
+    "license": "MIT",
+    "require": {
+        "php": "^8.0",
+        "equidna/laravel-toolkit": ">=1.0.0",
+        "illuminate/support": "^10.0 || ^11.0 || ^12.0",
+        "guzzlehttp/guzzle": "^7.0",
+        "laravel/framework": "^11.0 || ^12.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Apollo\\Proteus\\": "src/"
+        }
+    },
+    "scripts": {
+        "post-autoload-dump": []
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Apollo\\Proteus\\Providers\\ProteusServiceProvider"
+            ]
+        }
+    }
+}
