@@ -7,6 +7,7 @@
     "require": {
         "php": "^8.0",
         "equidna/laravel-toolkit": ">=1.0.0",
+        "league/flysystem-aws-s3-v3": "^3.0",
         "illuminate/support": "^10.0 || ^11.0 || ^12.0",
         "guzzlehttp/guzzle": "^7.0",
         "laravel/framework": "^11.0 || ^12.0"
