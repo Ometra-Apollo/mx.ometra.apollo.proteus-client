@@ -2,7 +2,7 @@
 namespace Ometra\Apollo\Proteus\Facades;
 
 use Illuminate\Support\Facades\Facade;
-use Apollo\Proteus\Proteus as ProteusClass;
+use Ometra\Apollo\Proteus\Proteus as ProteusClass;
 
 class Proteus extends Facade
 {

@@ -3,7 +3,7 @@
 namespace Ometra\Apollo\Proteus\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Apollo\Proteus\Proteus;
+use Ometra\Apollo\Proteus\Proteus;
 
 class ProteusServiceProvider extends ServiceProvider
 {
