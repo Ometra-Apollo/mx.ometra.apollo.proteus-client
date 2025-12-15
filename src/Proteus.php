@@ -1,6 +1,6 @@
 <?php
 
-namespace Apollo\Proteus;
+namespace Ometra\Apollo\Proteus;
 
 use Exception;
 use Illuminate\Http\UploadedFile;

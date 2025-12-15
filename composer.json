@@ -1,5 +1,5 @@
 {
-    "name": "apollo/proteus-client",
+    "name": "ometra/proteus-client",
     "description": "Proteus API adapter",
     "version": "1.0.0",
     "type": "library",
@@ -23,7 +23,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Apollo\\Proteus\\Providers\\ProteusServiceProvider"
+                "Ometra\\Apollo\\Proteus\\Providers\\ProteusServiceProvider"
             ]
         }
     }

@@ -1,5 +1,5 @@
 <?php
-namespace Apollo\Proteus\Facades;
+namespace Ometra\Apollo\Proteus\Facades;
 
 use Illuminate\Support\Facades\Facade;
 use Apollo\Proteus\Proteus as ProteusClass;

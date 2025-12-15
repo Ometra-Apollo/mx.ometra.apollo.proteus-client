@@ -1,6 +1,6 @@
 <?php
 
-namespace Apollo\Proteus\Providers;
+namespace Ometra\Apollo\Proteus\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Apollo\Proteus\Proteus;
