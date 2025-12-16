@@ -9,8 +9,22 @@ use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use GuzzleHttp\Exception\RequestException;
 
+/**
+ * Cliente principal para consumir la API de Proteus.
+ *
+ * Esta clase expone métodos de alto nivel para gestionar media,
+ * categorías, metadatos y transformaciones a través de la API.
+ */
 class Proteus extends BaseApiService
 {
+    /**
+     * Crea una nueva instancia del cliente de Proteus.
+     *
+     * @param string|null $format Formato del contenido de la petición.
+     *                            Null => JSON, cualquier otro => audio/mpeg.
+     *
+     * @throws \RuntimeException Si la URL o el token no están configurados.
+     */
     public function __construct(string|null $format = null)
     {
         parent::__construct(
@@ -20,7 +34,15 @@ class Proteus extends BaseApiService
         );
     }
 
-
+    /**
+     * Obtiene un listado de media desde Proteus.
+     *
+     * @param array $data Parámetros de filtrado/paginación.
+     *
+     * @return array Respuesta de la API.
+     *
+     * @throws Exception
+     */
     public function mediaIndex(array $data)
     {
         try {
@@ -30,6 +52,15 @@ class Proteus extends BaseApiService
         }
     }
 
+    /**
+     * Obtiene el detalle de un media por su identificador.
+     *
+     * @param string $id Identificador del media.
+     *
+     * @return array Respuesta de la API.
+     *
+     * @throws Exception
+     */
     public function mediaShow(string $id)
     {
         try {
@@ -39,6 +70,16 @@ class Proteus extends BaseApiService
         }
     }
 
+    /**
+     * Actualiza los metadatos de un media.
+     *
+     * @param string $id   Identificador del media.
+     * @param array  $data Datos de metadatos a actualizar.
+     *
+     * @return array Respuesta de la API.
+     *
+     * @throws Exception
+     */
     public function mediaUpdate(string $id, array $data)
     {
         try {
@@ -48,6 +89,15 @@ class Proteus extends BaseApiService
         }
     }
 
+    /**
+     * Crea un nuevo registro de media.
+     *
+     * @param array $data Datos del media a crear.
+     *
+     * @return array Respuesta de la API.
+     *
+     * @throws Exception
+     */
     public function mediaStore(array $data)
     {
         try {
@@ -57,6 +107,15 @@ class Proteus extends BaseApiService
         }
     }
 
+    /**
+     * Elimina un media por su identificador.
+     *
+     * @param string $id Identificador del media.
+     *
+     * @return array Respuesta de la API.
+     *
+     * @throws Exception
+     */
     public function mediaDelete(string $id)
     {
         try {
@@ -66,6 +125,23 @@ class Proteus extends BaseApiService
         }
     }
 
+    /**
+     * Descarga un media desde Proteus.
+     *
+     * Puede reintentar la descarga cuando la API aún está procesando
+     * el archivo (HTTP 202) hasta un máximo de intentos.
+     *
+     * @param string      $id                Identificador del media.
+     * @param string|null $ext               Extensión o formato solicitado.
+     * @param int         $maxRetries        Máximo de reintentos cuando la
+     *                                       respuesta es 202.
+     * @param int         $retryDelaySeconds Tiempo de espera entre reintentos
+     *                                       en segundos.
+     *
+     * @return StreamedResponse|\AWS\CRT\HTTP\Response
+     *
+     * @throws Exception
+     */
     public function mediaDownload(
         string $id,
         string|null $ext,
@@ -134,6 +210,18 @@ class Proteus extends BaseApiService
         throw new Exception("No se pudo descargar el archivo {$id} después de {$maxRetries} intentos");
     }
 
+    /**
+     * Descarga un media y lo guarda en el sistema de ficheros configurado
+     * en Laravel a través del facade `Storage`.
+     *
+     * @param string $id       Identificador del media.
+     * @param string $filename Nombre del archivo a guardar (no se usa
+     *                         actualmente en la clave de almacenamiento).
+     *
+     * @return void
+     *
+     * @throws Exception
+     */
     public function saveMediaLocal(string $id, string $filename): void
     {
         try {
@@ -156,6 +244,13 @@ class Proteus extends BaseApiService
         }
     }
 
+    /**
+     * Obtiene el listado de categorías disponibles en Proteus.
+     *
+     * @return array Respuesta de la API.
+     *
+     * @throws Exception
+     */
     public function categoriesIndex()
     {
         try {
@@ -165,6 +260,20 @@ class Proteus extends BaseApiService
         }
     }
 
+    /**
+     * Sube uno o varios archivos a un endpoint determinado de Proteus.
+     *
+     * Este método genera el arreglo `multipart` esperado por Guzzle
+     * para envíos de ficheros y metadatos.
+     *
+     * @param string $endpoint Endpoint relativo de la API donde enviar los archivos.
+     * @param array  $data     Datos del formulario, incluyendo instancias de
+     *                         `UploadedFile`, metadatos y transformaciones.
+     *
+     * @return array Respuesta de la API.
+     *
+     * @throws Exception
+     */
     public function uploadFile(string $endpoint, array $data)
     {
         try {
@@ -195,6 +304,16 @@ class Proteus extends BaseApiService
         }
     }
 
+    /**
+     * Envía metadatos a un endpoint determinado usando formato multipart.
+     *
+     * @param string $endpoint Endpoint relativo de la API.
+     * @param array  $data     Arreglo asociativo de metadatos.
+     *
+     * @return array Respuesta de la API.
+     *
+     * @throws Exception
+     */
     public function setMetadata(string $endpoint, array $data)
     {
         try {
@@ -216,11 +335,27 @@ class Proteus extends BaseApiService
         }
     }
 
+    /**
+     * Procesa un arreglo de archivos y los transforma en partes multipart.
+     *
+     * @param string $key   Nombre del campo.
+     * @param array  $files Arreglo de instancias de `UploadedFile`.
+     *
+     * @return array
+     */
     private function processFiles(string $key, array $files): array
     {
         return array_map(fn($file) => $this->formatFile($key, $file), $files);
     }
 
+    /**
+     * Formatea un valor de transformación para el envío multipart.
+     *
+     * @param string $key   Clave de la transformación.
+     * @param mixed  $value Valor o configuración de la transformación.
+     *
+     * @return array
+     */
     private function formatTransformations(string $key, mixed $value): array
     {
         return [
@@ -229,6 +364,16 @@ class Proteus extends BaseApiService
         ];
     }
 
+    /**
+     * Formatea un archivo individual para el envío multipart.
+     *
+     * @param string       $key  Nombre del campo.
+     * @param UploadedFile $file Archivo subido desde Laravel.
+     *
+     * @return array
+     *
+     * @throws Exception Si el archivo no existe en el sistema de archivos.
+     */
     private function formatFile(string $key, UploadedFile $file): array
     {
         if (!file_exists($file->getPathname())) {
@@ -242,6 +387,14 @@ class Proteus extends BaseApiService
         ];
     }
 
+    /**
+     * Formatea un campo simple (no archivo) para el envío multipart.
+     *
+     * @param string $key   Nombre del campo.
+     * @param mixed  $value Valor del campo.
+     *
+     * @return array
+     */
     private function formatField(string $key, mixed $value): array
     {
         return [
@@ -250,6 +403,14 @@ class Proteus extends BaseApiService
         ];
     }
 
+    /**
+     * Formatea un campo de metadatos para el envío multipart.
+     *
+     * @param string $key   Clave del metadato.
+     * @param mixed  $value Valor del metadato.
+     *
+     * @return array
+     */
     public function formatMetadata(string $key, mixed $value): array
     {
         return [
@@ -258,6 +419,15 @@ class Proteus extends BaseApiService
         ];
     }
 
+    /**
+     * Obtiene los metadatos configurados para una clave dada.
+     *
+     * @param string $key Clave del metadato.
+     *
+     * @return array Respuesta de la API.
+     *
+     * @throws Exception
+     */
     public function metadataKeys(string $key)
     {
         try {
@@ -267,6 +437,15 @@ class Proteus extends BaseApiService
         }
     }
 
+    /**
+     * Obtiene los valores posibles para una clave de metadato.
+     *
+     * @param string $key Clave del metadato.
+     *
+     * @return array Respuesta de la API.
+     *
+     * @throws Exception
+     */
     public function metadataValuesFormKey(string $key)
     {
         try {
@@ -276,16 +455,35 @@ class Proteus extends BaseApiService
         }
     }
 
+    /**
+     * Devuelve la configuración de transformaciones definida en `config/proteus.php`.
+     *
+     * @return array
+     */
     public function transformationsConfig(): array
     {
         return (array) Config::get('proteus.transformations', []);
     }
 
+    /**
+     * Devuelve la configuración de formatos definida en `config/proteus.php`.
+     *
+     * @return array
+     */
     public function formatsConfig(): array
     {
         return (array) Config::get('formats', []);
     }
 
+    /**
+     * Obtiene la información de preset asociada a un media.
+     *
+     * Si ocurre un error la función retorna null.
+     *
+     * @param string $id Identificador del media.
+     *
+     * @return mixed|null
+     */
     public function presetByMedia(string $id): mixed
     {
         try {
