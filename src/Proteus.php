@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use GuzzleHttp\Exception\RequestException;
+use Ometra\Apollo\Proteus\Partials\PayloadFormatter;
+use Ometra\Apollo\Proteus\Partials\MediaDownloader;
 
 /**
  * Cliente principal para consumir la API de Proteus.
@@ -20,12 +22,10 @@ class Proteus extends BaseApiService
     /**
      * Crea una nueva instancia del cliente de Proteus.
      *
-     * @param string|null $format Formato del contenido de la petición.
-     *                            Null => JSON, cualquier otro => audio/mpeg.
-     *
-     * @throws \RuntimeException Si la URL o el token no están configurados.
+     * @param string|null $format
+     * @throws RuntimeException 
      */
-    public function __construct(string|null $format = null)
+    public function __construct(string|null $format = null, protected PayloadFormatter $formatter, protected MediaDownloader $downloader)
     {
         parent::__construct(
             Config::get('proteus.url'),
@@ -36,11 +36,8 @@ class Proteus extends BaseApiService
 
     /**
      * Obtiene un listado de media desde Proteus.
-     *
-     * @param array $data Parámetros de filtrado/paginación.
-     *
-     * @return array Respuesta de la API.
-     *
+     * @param array $data 
+     * @return array 
      * @throws Exception
      */
     public function mediaIndex(array $data)
@@ -54,11 +51,8 @@ class Proteus extends BaseApiService
 
     /**
      * Obtiene el detalle de un media por su identificador.
-     *
-     * @param string $id Identificador del media.
-     *
-     * @return array Respuesta de la API.
-     *
+     * @param string $id 
+     * @return array 
      * @throws Exception
      */
     public function mediaShow(string $id)
@@ -72,36 +66,33 @@ class Proteus extends BaseApiService
 
     /**
      * Actualiza los metadatos de un media.
-     *
-     * @param string $id   Identificador del media.
-     * @param array  $data Datos de metadatos a actualizar.
-     *
-     * @return array Respuesta de la API.
-     *
+     * @param string $id   
+     * @param array  $data 
+     * @return array
      * @throws Exception
      */
-    public function mediaUpdate(string $id, array $data)
+    /**
+     * Actualiza los metadatos y categoría de un media.
+     */
+    public function mediaUpdate(string $id, array $data): array
     {
-        try {
-            return $this->request(method: 'POST', endpoint: 'media' . '/' . $id . '/metadata', data: $data, format: 'multipart');
-        } catch (RequestException $e) {
-            throw new Exception($e->getMessage());
-        }
+        $endpoint = "media/{$id}/metadata";
+        $payload = $this->formatter->prepareMultipart($data);
+
+        return $this->request(method: 'POST', endpoint: $endpoint, data: $payload, format: 'multipart');
     }
 
     /**
      * Crea un nuevo registro de media.
-     *
-     * @param array $data Datos del media a crear.
-     *
-     * @return array Respuesta de la API.
-     *
+     * @param array $data 
+     * @return array 
      * @throws Exception
      */
     public function mediaStore(array $data)
     {
         try {
-            return $this->request(method: 'POST', endpoint: 'media/store', data: $data);
+            $multipartPayload = $this->formatter->prepareMultipart($data);
+            return $this->request(method: 'POST', endpoint: 'media', data: $multipartPayload, format: 'multipart');
         } catch (RequestException $e) {
             throw new Exception($e->getMessage());
         }
@@ -109,11 +100,8 @@ class Proteus extends BaseApiService
 
     /**
      * Elimina un media por su identificador.
-     *
-     * @param string $id Identificador del media.
-     *
-     * @return array Respuesta de la API.
-     *
+     * @param string $id 
+     * @return array 
      * @throws Exception
      */
     public function mediaDelete(string $id)
@@ -126,129 +114,8 @@ class Proteus extends BaseApiService
     }
 
     /**
-     * Descarga un media desde Proteus.
-     *
-     * Puede reintentar la descarga cuando la API aún está procesando
-     * el archivo (HTTP 202) hasta un máximo de intentos.
-     *
-     * @param string      $id                Identificador del media.
-     * @param string|null $ext               Extensión o formato solicitado.
-     * @param int         $maxRetries        Máximo de reintentos cuando la
-     *                                       respuesta es 202.
-     * @param int         $retryDelaySeconds Tiempo de espera entre reintentos
-     *                                       en segundos.
-     *
-     * @return StreamedResponse|\AWS\CRT\HTTP\Response
-     *
-     * @throws Exception
-     */
-    public function mediaDownload(
-        string $id,
-        string|null $ext,
-        int $maxRetries = 3,
-        int $retryDelaySeconds = 5
-    ): StreamedResponse|\AWS\CRT\HTTP\Response {
-
-        $attempt = 0;
-        do {
-            try {
-                $extension = $ext ?? '';
-
-                $response = $this->requestDownload(
-                    method: 'GET',
-                    endpoint: 'media' . '/' . $id . '/download?ext=' . $extension,
-                    format: 'stream'
-                );
-
-                $statusCode = $response->getStatusCode();
-
-                if ($statusCode == 200) {
-
-                    $stream = $response->getBody();
-                    $contentType = $response->getHeaderLine('Content-Type') ?: 'application/octet-stream';
-                    $contentLength = $response->getHeaderLine('Content-Length');
-                    $disposition = 'attachment; filename="' . $id . '"';
-
-                    $streamedResponse = new StreamedResponse(function () use ($stream) {
-                        while (!$stream->eof()) {
-                            echo $stream->read(8192);
-                            flush();
-                        }
-                    });
-
-                    $streamedResponse->headers->set('Content-Type', $contentType);
-                    $streamedResponse->headers->set('Content-Disposition', $disposition);
-
-                    if ($contentLength) {
-                        $streamedResponse->headers->set('Content-Length', $contentLength);
-                    }
-
-                    $streamedResponse->headers->set('Cache-Control', 'no-cache, no-store, must-revalidate');
-
-                    return $streamedResponse;
-                }
-
-                $content = $response->getBody()->getContents();
-                $body = json_decode($content, true);
-                $message = $body['message'] ?? 'Error inesperado';
-
-                if ($statusCode === 202) {
-                    if (++$attempt > $maxRetries) {
-                        throw new Exception("Máximo reintentos alcanzado. Mensaje: {$message}");
-                    }
-
-                    sleep($retryDelaySeconds);
-                    continue;
-                }
-
-                throw new Exception("Error inesperado en descarga: código HTTP {$statusCode}. Mensaje: {$message}");
-            } catch (RequestException $e) {
-                throw new Exception($e->getMessage());
-            }
-        } while ($attempt <= $maxRetries);
-
-        throw new Exception("No se pudo descargar el archivo {$id} después de {$maxRetries} intentos");
-    }
-
-    /**
-     * Descarga un media y lo guarda en el sistema de ficheros configurado
-     * en Laravel a través del facade `Storage`.
-     *
-     * @param string $id       Identificador del media.
-     * @param string $filename Nombre del archivo a guardar (no se usa
-     *                         actualmente en la clave de almacenamiento).
-     *
-     * @return void
-     *
-     * @throws Exception
-     */
-    public function saveMediaLocal(string $id, string $filename): void
-    {
-        try {
-
-            $response = $this->requestDownload(
-                method: 'GET',
-                endpoint: 'media/' . $id . '/download',
-                format: 'stream'
-            );
-
-            $stream = $response->getBody();
-
-            Storage::putStream($id, $stream);
-
-            if (is_resource($stream)) {
-                fclose($stream);
-            }
-        } catch (RequestException $e) {
-            throw new Exception('Error al guardar el archivo: ' . $e->getMessage());
-        }
-    }
-
-    /**
      * Obtiene el listado de categorías disponibles en Proteus.
-     *
-     * @return array Respuesta de la API.
-     *
+     * @return array 
      * @throws Exception
      */
     public function categoriesIndex()
@@ -261,170 +128,189 @@ class Proteus extends BaseApiService
     }
 
     /**
-     * Sube uno o varios archivos a un endpoint determinado de Proteus.
-     *
-     * Este método genera el arreglo `multipart` esperado por Guzzle
-     * para envíos de ficheros y metadatos.
-     *
-     * @param string $endpoint Endpoint relativo de la API donde enviar los archivos.
-     * @param array  $data     Datos del formulario, incluyendo instancias de
-     *                         `UploadedFile`, metadatos y transformaciones.
-     *
-     * @return array Respuesta de la API.
-     *
-     * @throws Exception
+     * Crea una nueva categoría.
+     * @param array $data
+     * @return array
      */
-    public function uploadFile(string $endpoint, array $data)
+    public function categoryStore(array $data): array
     {
         try {
-            $multipart = [];
-            foreach ($data as $key => $value) {
-                if ($key == "transformations") {
-                    foreach ($value as $t_value_key => $t) {
-                        $multipart[] = $this->formatTransformations($t_value_key, $t);
-                    }
-                } elseif (is_array($value)) {
-                    foreach ($value as $value_key => $file) {
-                        if ($file instanceof UploadedFile) {
-                            $multipart = array_merge($multipart, $this->processFiles($key, $value));
-                        } else {
-                            $multipart[] = $this->formatMetadata($value_key, $file);
-                        }
-                    }
-                } elseif ($value instanceof UploadedFile) {
-                    $multipart[] = $this->formatFile($key, $value);
-                } else {
-                    $multipart[] = $this->formatField($key, $value);
-                }
-            }
-
-            return $this->request(method: 'POST', endpoint: $endpoint, data: $multipart, format: 'multipart');
-        } catch (Exception $e) {
-            throw new Exception("Error al subir archivo: " . $e->getMessage());
+            return $this->request(method: 'POST', endpoint: 'categories', data: $data);
+        } catch (RequestException $e) {
+            throw new Exception($e->getMessage());
         }
     }
 
     /**
-     * Envía metadatos a un endpoint determinado usando formato multipart.
-     *
-     * @param string $endpoint Endpoint relativo de la API.
-     * @param array  $data     Arreglo asociativo de metadatos.
-     *
-     * @return array Respuesta de la API.
-     *
-     * @throws Exception
+     * Actualiza una categoría existente.
+     * @param string $id
+     * @param array  $data
+     * @return array
      */
-    public function setMetadata(string $endpoint, array $data)
+    public function categoryUpdate(string $id, array $data): array
     {
         try {
-            $multipart = [];
+            return $this->request(method: 'POST', endpoint: 'categories' . '/' . $id, data: $data);
+        } catch (RequestException $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
 
-            foreach ($data as $key => $value) {
-                if (is_array($value)) {
-                    foreach ($value as $value_key => $file) {
-                        $multipart[] = $this->formatMetadata($value_key, $file);
-                    }
-                } else {
-                    $multipart[] = $this->formatField($key, $value);
-                }
+    /**
+     * Elimina una categoría por su identificador.
+     * @param string $id 
+     * @return array 
+     * @throws Exception
+     */
+    public function categoryDelete(string $id): array
+    {
+        try {
+            return $this->request(method: 'DELETE', endpoint: 'categories' . '/' . $id);
+        } catch (RequestException $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
+
+    /**
+     * Obtiene el detalle de una categoría por su identificador.
+     * @param string $id 
+     */
+    public function categoryShow(string $id): array
+    {
+        try {
+            return $this->request(method: 'GET', endpoint: 'categories' . '/' . $id);
+        } catch (RequestException $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
+
+    /**
+     * Obtiene el listado de los directorios
+     * @return array 
+     * @throws Exception
+     */
+    public function directoriesIndex(): array
+    {
+        try {
+            return $this->request(method: 'GET', endpoint: 'directories');
+        } catch (RequestException $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
+
+    /**
+     * Crea un nuevo directorio en Proteus.
+     * @param array $data 
+     * @return array 
+     * @throws Exception
+     */
+    public function directoryStore(array $data): array
+    {
+        try {
+            return $this->request(method: 'POST', endpoint: 'directories', data: $data);
+        } catch (RequestException $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
+
+    /**
+     * Obtiene el detalle de un directorio por su identificador.
+     * @param string $id
+     * @return array 
+     * @throws Exception
+     */
+    public function directoryShow(string $id): array
+    {
+        try {
+            return $this->request(method: 'GET', endpoint: 'directories' . '/' . $id);
+        } catch (RequestException $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
+
+    /**
+     * Elimina un directorio por su identificador.
+     * @param string $id 
+     * @return array
+     * @throws Exception
+     */
+    public function directoryDelete(string $id): array
+    {
+        try {
+            return $this->request(method: 'DELETE', endpoint: 'directories' . '/' . $id);
+        } catch (RequestException $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
+
+    /**
+     * Actualiza los datos de un directorio.
+     * @param string $id Identificador del directorio.
+     * @param array $data Datos a actualizar.
+     */
+    public function directoryUpdate(string $id, array $data): array
+    {
+        try {
+            return $this->request(method: 'POST', endpoint: 'directories' . '/' . $id, data: $data);
+        } catch (RequestException $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
+
+
+
+    /**
+     * Descarga un media desde Proteuss
+     * @param string      $id                
+     * @param string|null $ext               
+     * @param int         $maxRetries        
+     * @param int         $retryDelaySeconds 
+     * @return StreamedResponse|\AWS\CRT\HTTP\Response
+     * @throws Exception
+     */
+    public function mediaDownload(
+        string $id,
+        ?string $ext = null,
+        int $maxRetries = 3,
+        int $retryDelaySeconds = 5
+    ): StreamedResponse {
+        return $this->downloader->download($id, $ext, $maxRetries, $retryDelaySeconds);
+    }
+
+    /**
+     * Descarga un media y lo guarda en el sistema de ficheros configurado
+     * en Laravel a través del facade `Storage`.
+     *
+     * @param string $id       
+     * @param string $filename
+     * @return void
+     * @throws Exception
+     */
+    public function saveMediaLocal(string $id, string $ext): void
+    {
+        try {
+            $response = $this->requestDownload(
+                method: 'GET',
+                endpoint: 'media/' . $id . '/download',
+                data: [
+                    'ext' => $ext
+                ]
+            );
+            $stream = $response->getBody();
+            Storage::putStream($id, $stream);
+            if (is_resource($stream)) {
+                $stream->close();
             }
-
-            return $this->request(method: 'POST', endpoint: $endpoint, data: $multipart, format: 'multipart');
-        } catch (Exception $e) {
-            throw new Exception("Error al realizar transformaciones: " . $e->getMessage());
+        } catch (RequestException $e) {
+            throw new Exception('Error al guardar el archivo: ' . $e->getMessage());
         }
-    }
-
-    /**
-     * Procesa un arreglo de archivos y los transforma en partes multipart.
-     *
-     * @param string $key   Nombre del campo.
-     * @param array  $files Arreglo de instancias de `UploadedFile`.
-     *
-     * @return array
-     */
-    private function processFiles(string $key, array $files): array
-    {
-        return array_map(fn($file) => $this->formatFile($key, $file), $files);
-    }
-
-    /**
-     * Formatea un valor de transformación para el envío multipart.
-     *
-     * @param string $key   Clave de la transformación.
-     * @param mixed  $value Valor o configuración de la transformación.
-     *
-     * @return array
-     */
-    private function formatTransformations(string $key, mixed $value): array
-    {
-        return [
-            'name'     => "transformations[$key]",
-            'contents' => $value['key'],
-        ];
-    }
-
-    /**
-     * Formatea un archivo individual para el envío multipart.
-     *
-     * @param string       $key  Nombre del campo.
-     * @param UploadedFile $file Archivo subido desde Laravel.
-     *
-     * @return array
-     *
-     * @throws Exception Si el archivo no existe en el sistema de archivos.
-     */
-    private function formatFile(string $key, UploadedFile $file): array
-    {
-        if (!file_exists($file->getPathname())) {
-            throw new Exception("El archivo no existe en la ruta: " . $file->getPathname());
-        }
-
-        return [
-            'name'     => $key . '[]',
-            'contents' => fopen($file->getRealPath(), 'r'),
-            'filename' => $file->getClientOriginalName(),
-        ];
-    }
-
-    /**
-     * Formatea un campo simple (no archivo) para el envío multipart.
-     *
-     * @param string $key   Nombre del campo.
-     * @param mixed  $value Valor del campo.
-     *
-     * @return array
-     */
-    private function formatField(string $key, mixed $value): array
-    {
-        return [
-            'name'     => $key,
-            'contents' => is_array($value) ? json_encode($value) : $value,
-        ];
-    }
-
-    /**
-     * Formatea un campo de metadatos para el envío multipart.
-     *
-     * @param string $key   Clave del metadato.
-     * @param mixed  $value Valor del metadato.
-     *
-     * @return array
-     */
-    public function formatMetadata(string $key, mixed $value): array
-    {
-        return [
-            'name'     => "metadata[$key]",
-            'contents' => is_array($value) ? json_encode($value) : $value,
-        ];
     }
 
     /**
      * Obtiene los metadatos configurados para una clave dada.
      *
-     * @param string $key Clave del metadato.
-     *
-     * @return array Respuesta de la API.
+     * @param string $key 
+     * @return array 
      *
      * @throws Exception
      */
@@ -438,26 +324,7 @@ class Proteus extends BaseApiService
     }
 
     /**
-     * Obtiene los valores posibles para una clave de metadato.
-     *
-     * @param string $key Clave del metadato.
-     *
-     * @return array Respuesta de la API.
-     *
-     * @throws Exception
-     */
-    public function metadataValuesFormKey(string $key)
-    {
-        try {
-            return $this->request(method: 'GET', endpoint: 'media/metadata/' . $key . '/values');
-        } catch (RequestException $e) {
-            throw new Exception($e->getMessage());
-        }
-    }
-
-    /**
      * Devuelve la configuración de transformaciones definida en `config/proteus.php`.
-     *
      * @return array
      */
     public function transformationsConfig(): array
@@ -467,7 +334,6 @@ class Proteus extends BaseApiService
 
     /**
      * Devuelve la configuración de formatos definida en `config/proteus.php`.
-     *
      * @return array
      */
     public function formatsConfig(): array
@@ -477,11 +343,7 @@ class Proteus extends BaseApiService
 
     /**
      * Obtiene la información de preset asociada a un media.
-     *
-     * Si ocurre un error la función retorna null.
-     *
-     * @param string $id Identificador del media.
-     *
+     * @param string $id 
      * @return mixed|null
      */
     public function presetByMedia(string $id): mixed

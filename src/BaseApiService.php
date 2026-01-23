@@ -91,13 +91,13 @@ class BaseApiService
      *
      * @throws Exception Si ocurre un error de red o HTTP.
      */
-    protected function requestDownload(string $method, string $endpoint, array $data = [], string $format = 'json')
+    protected function requestDownload(string $method, string $endpoint, array $data = [])
     {
         try {
             return  $this->client->request(
                 method: $method,
                 uri: $endpoint,
-                options: [$format => $data]
+                options: ['query' => $data]
             );
         } catch (RequestException $e) {
             throw new Exception($e->getMessage());

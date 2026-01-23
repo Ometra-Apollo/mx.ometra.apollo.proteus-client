@@ -18,11 +18,9 @@ class ProteusServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function register()
+    public function register(): void
     {
-        $this->app->singleton(Proteus::class, function ($app) {
-            return new Proteus();
-        });
+        $this->app->singleton(Proteus::class);
     }
 
     /**
