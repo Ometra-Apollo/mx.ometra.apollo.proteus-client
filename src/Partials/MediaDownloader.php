@@ -37,7 +37,7 @@ class MediaDownloader
                 $statusCode = $response->getStatusCode();
 
                 if ($statusCode === 200) {
-                    return $this->createStreamedResponse($id, $response);
+                    return $this->createStreamedResponse($ext, $id, $response);
                 }
 
                 if ($statusCode === 202) {
@@ -62,11 +62,12 @@ class MediaDownloader
      * @param string $id
      * @param mixed  $response
      */
-    protected function createStreamedResponse(string $id, $response): StreamedResponse
+    protected function createStreamedResponse(string $ext, string $id, $response): StreamedResponse
     {
         $stream = $response->getBody();
         $contentType = $response->getHeaderLine('Content-Type') ?: 'application/octet-stream';
         $contentLength = $response->getHeaderLine('Content-Length');
+        $filename = $ext ? "{$id}.{$ext}" : $id;
 
         $streamedResponse = new StreamedResponse(function () use ($stream) {
             while (!$stream->eof()) {
@@ -77,7 +78,7 @@ class MediaDownloader
 
         $streamedResponse->headers->add([
             'Content-Type'        => $contentType,
-            'Content-Disposition' => "attachment; filename=\"{$id}\"",
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
             'Cache-Control'       => 'no-cache, no-store, must-revalidate',
         ]);
 

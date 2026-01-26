@@ -40,7 +40,7 @@ class Proteus extends BaseApiService
      * @return array 
      * @throws Exception
      */
-    public function mediaIndex(array $data)
+    public function mediaIndex(array $data): array
     {
         try {
             return $this->request(method: 'GET', endpoint: 'media', data: $data);
@@ -55,7 +55,7 @@ class Proteus extends BaseApiService
      * @return array 
      * @throws Exception
      */
-    public function mediaShow(string $id)
+    public function mediaShow(string $id): array
     {
         try {
             return $this->request(method: 'GET', endpoint: 'media' . '/' . $id);
@@ -65,30 +65,12 @@ class Proteus extends BaseApiService
     }
 
     /**
-     * Actualiza los metadatos de un media.
-     * @param string $id   
-     * @param array  $data 
-     * @return array
-     * @throws Exception
-     */
-    /**
-     * Actualiza los metadatos y categoría de un media.
-     */
-    public function mediaUpdate(string $id, array $data): array
-    {
-        $endpoint = "media/{$id}/metadata";
-        $payload = $this->formatter->prepareMultipart($data);
-
-        return $this->request(method: 'POST', endpoint: $endpoint, data: $payload, format: 'multipart');
-    }
-
-    /**
      * Crea un nuevo registro de media.
      * @param array $data 
      * @return array 
      * @throws Exception
      */
-    public function mediaStore(array $data)
+    public function UploadFile(array $data): array
     {
         try {
             $multipartPayload = $this->formatter->prepareMultipart($data);
@@ -104,10 +86,106 @@ class Proteus extends BaseApiService
      * @return array 
      * @throws Exception
      */
-    public function mediaDelete(string $id)
+    public function mediaDelete(string $id): array
     {
         try {
             return $this->request(method: 'DELETE', endpoint: 'media' . '/' . $id);
+        } catch (RequestException $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
+
+    public function requestTransformations(string $id_media, array $data): array
+    {
+        try {
+            return $this->request(method: 'POST', endpoint: 'media/transformations' . $id_media . '/request-transformations', data: $data);
+        } catch (RequestException $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
+
+    /**
+     * Obtiene las claves de metadatos disponibles en Proteus.
+     * @param string $key
+     * @return array
+     * @throws Exception
+     */
+    public function metadataKeys(string $key): array
+    {
+        try {
+            return $this->request(method: 'GET', endpoint: 'media/metadata' . '/' . $key);
+        } catch (RequestException $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
+
+    /**
+     * Obtiene los valores asociados a una clave de metadato.
+     * @param string $key 
+     * @return array 
+     * @throws Exception
+     */
+    public function metadataValuesFormKey(string $key): array
+    {
+        try {
+            return $this->request(method: 'GET', endpoint: 'media/metadata/values/' . $key);
+        } catch (RequestException $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
+
+    /**
+     * Obtiene los metadatos asociados a un media por su identificador.
+     * @param string $id 
+     * @return array 
+     * @throws Exception
+     */
+    public function metadataShow(string $id, string $key): array
+    {
+        try {
+            return $this->request(method: 'GET', endpoint: 'media/' . $id . '/metadata/' . $key);
+        } catch (RequestException $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
+
+    /**
+     * Crea nuevos metadatos para un media.
+     * @param string $id   
+     * @param array  $data 
+     * @return array
+     * @throws Exception
+     */
+    public function metadataStore(string $id, array $data): array
+    {
+        $payload = $this->formatter->prepareMultipart($data);
+        return $this->request(method: 'POST', endpoint: 'media/' . $id, data: $payload, format: 'multipart');
+    }
+
+    /**
+     * Actualiza los metadatos de un media.
+     * @param string $id   
+     * @param array  $data 
+     * @return array
+     * @throws Exception
+     */
+    public function metadataUpdate(string $id, array $data): array
+    {
+        $payload = $this->formatter->prepareMultipart($data);
+        return $this->request(method: 'POST', endpoint: 'media/' . $id, data: $payload, format: 'multipart');
+    }
+
+    /**
+     * Elimina un metadato específico de un media.
+     * @param string $id  
+     * @param string $key 
+     * @return array 
+     * @throws Exception
+     */
+    public function metadataDelete(string $id, string $key): array
+    {
+        try {
+            return $this->request(method: 'DELETE', endpoint: 'media/' . $id . '/metadata/' . $key);
         } catch (RequestException $e) {
             throw new Exception($e->getMessage());
         }
@@ -118,7 +196,7 @@ class Proteus extends BaseApiService
      * @return array 
      * @throws Exception
      */
-    public function categoriesIndex()
+    public function categoriesIndex(): array
     {
         try {
             return $this->request(method: 'GET', endpoint: 'categories');
@@ -251,13 +329,11 @@ class Proteus extends BaseApiService
     public function directoryUpdate(string $id, array $data): array
     {
         try {
-            return $this->request(method: 'POST', endpoint: 'directories' . '/' . $id, data: $data);
+            return $this->request(method: 'POST', endpoint: 'directories/' . $id, data: $data);
         } catch (RequestException $e) {
             throw new Exception($e->getMessage());
         }
     }
-
-
 
     /**
      * Descarga un media desde Proteuss
@@ -307,17 +383,74 @@ class Proteus extends BaseApiService
     }
 
     /**
-     * Obtiene los metadatos configurados para una clave dada.
-     *
-     * @param string $key 
-     * @return array 
-     *
-     * @throws Exception
+     * Obtiene la información de preset asociada a un media.
+     * @param string $id 
+     * @return mixed|null
      */
-    public function metadataKeys(string $key)
+    public function presetIndex(string $directory_id): array
     {
         try {
-            return $this->request(method: 'GET', endpoint: 'media/metadata' . '/' . $key);
+            return $this->request(method: 'GET', endpoint: 'directories/' . $directory_id . '/presets');
+        } catch (RequestException $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
+
+    /**
+     * Crea un nuevo preset de transformaciones.
+     * @param array $data
+     * @return array
+     */
+    public function presetStore(array $data): array
+    {
+        try {
+            return $this->request(method: 'POST', endpoint: 'presets', data: $data);
+        } catch (RequestException $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
+
+    /**
+     * Elimina un preset de transformaciones.
+     * @param string $directory_id
+     * @param string $preset_id
+     * @return array
+     */
+    public function presetDelete(string $directory_id, string $preset_id): array
+    {
+        try {
+            return $this->request(method: 'DELETE', endpoint: 'directories/' . $directory_id . '/presets/' . $preset_id);
+        } catch (RequestException $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
+
+    /**
+     * Obtiene el detalle de un preset de transformaciones.
+     * @param string $directory_id
+     * @param string $preset_id
+     * @return array
+     */
+    public function presetShow(string $directory_id, string $preset_id): array
+    {
+        try {
+            return $this->request(method: 'GET', endpoint: 'directories/' . $directory_id . '/presets/' . $preset_id);
+        } catch (RequestException $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
+
+    /**
+     * Actualiza un preset de transformaciones.
+     * @param string $directory_id
+     * @param string $preset_id
+     * @param array  $data
+     * @return array
+     */
+    public function presetUpdate(string $directory_id, string $preset_id, array $data): array
+    {
+        try {
+            return $this->request(method: 'POST', endpoint: 'directories/' . $directory_id . '/presets/' . $preset_id, data: $data);
         } catch (RequestException $e) {
             throw new Exception($e->getMessage());
         }
@@ -339,21 +472,5 @@ class Proteus extends BaseApiService
     public function formatsConfig(): array
     {
         return (array) Config::get('formats', []);
-    }
-
-    /**
-     * Obtiene la información de preset asociada a un media.
-     * @param string $id 
-     * @return mixed|null
-     */
-    public function presetByMedia(string $id): mixed
-    {
-        try {
-            return $this->request(method: 'GET', endpoint: 'media/' . $id . '/preset');
-        } catch (RequestException $e) {
-            return null;
-        } catch (Exception $e) {
-            return null;
-        }
     }
 }

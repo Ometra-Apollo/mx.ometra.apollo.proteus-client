@@ -91,16 +91,21 @@ class BaseApiService
      *
      * @throws Exception Si ocurre un error de red o HTTP.
      */
-    protected function requestDownload(string $method, string $endpoint, array $data = [])
+    protected function requestDownload(string $method, string $endpoint, array $data = [], string $format = 'default')
     {
         try {
-            return  $this->client->request(
+            $options = [
+                'query' => $data,
+                'stream' => ($format === 'stream'),
+            ];
+
+            return $this->client->request(
                 method: $method,
                 uri: $endpoint,
-                options: ['query' => $data]
+                options: $options
             );
         } catch (RequestException $e) {
-            throw new Exception($e->getMessage());
+            throw new Exception("Error de conexión en Proteuss: " . $e->getMessage());
         }
     }
 }
