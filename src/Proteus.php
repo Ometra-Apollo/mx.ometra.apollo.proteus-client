@@ -159,7 +159,7 @@ class Proteus extends BaseApiService
     public function metadataStore(string $id, array $data): array
     {
         $payload = $this->formatter->prepareMultipart($data);
-        return $this->request(method: 'POST', endpoint: 'media/' . $id, data: $payload, format: 'multipart');
+        return $this->request(method: 'POST', endpoint: 'media/' . $id .'/metadata', data: $payload, format: 'multipart');
     }
 
     /**
@@ -472,5 +472,16 @@ class Proteus extends BaseApiService
     public function formatsConfig(): array
     {
         return (array) Config::get('formats', []);
+    }
+
+    /**
+     * Formatea un metadato usando el formateador interno.
+     * @param string $key
+     * @param mixed  $value
+     * @return array
+     */
+    public function formatMetadata(string $key, mixed $value)
+    {
+        return $this->formatter->formatMetadata($key, $value);
     }
 }
