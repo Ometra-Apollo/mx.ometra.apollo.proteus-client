@@ -7,12 +7,16 @@ use Exception;
 
 class PayloadFormatter
 {
+    public function __construct() {
+        //
+    }
     /**
      * Transforma un array asociativo en una estructura multipart para Guzzle.
      *
      * @param array $data
      * @return array
      */
+    
     public function prepareMultipart(array $data): array
     {
         $multipart = [];
