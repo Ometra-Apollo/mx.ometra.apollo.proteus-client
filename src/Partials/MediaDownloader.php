@@ -4,16 +4,10 @@ namespace Ometra\Apollo\Proteus\Partials;
 
 use Exception;
 use GuzzleHttp\Exception\RequestException;
-use Ometra\Apollo\Proteus\BaseApiService;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
-class MediaDownloader extends BaseApiService
+trait DownloadMedia
 {
-    public function __construct()
-    {
-        //
-    }
-
     /**
      * Ejecuta la lógica de descarga con reintentos y streaming.
      * @param string $id
@@ -32,6 +26,7 @@ class MediaDownloader extends BaseApiService
 
         do {
             try {
+                // Se asume que requestDownload está disponible en la clase que usa el trait
                 $response = $this->requestDownload(
                     method: 'GET',
                     endpoint: "media/{$id}/download?ext={$extension}",
@@ -41,7 +36,7 @@ class MediaDownloader extends BaseApiService
                 $statusCode = $response->getStatusCode();
 
                 if ($statusCode === 200) {
-                    return $this->createStreamedResponse($ext, $id, $response);
+                    return $this->createStreamedResponse($extension, $id, $response);
                 }
 
                 if ($statusCode === 202) {

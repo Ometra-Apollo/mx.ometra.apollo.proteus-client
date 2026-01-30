@@ -3,13 +3,12 @@
 namespace Ometra\Apollo\Proteus;
 
 use Exception;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use GuzzleHttp\Exception\RequestException;
-use Ometra\Apollo\Proteus\Partials\PayloadFormatter;
-use Ometra\Apollo\Proteus\Partials\MediaDownloader;
+use Ometra\Apollo\Proteus\Partials\PayloadFormatting;
+use Ometra\Apollo\Proteus\Partials\DownloadMedia;
 
 /**
  * Cliente principal para consumir la API de Proteus.
@@ -19,13 +18,15 @@ use Ometra\Apollo\Proteus\Partials\MediaDownloader;
  */
 class Proteus extends BaseApiService
 {
+    use PayloadFormatting, DownloadMedia;
+
     /**
      * Crea una nueva instancia del cliente de Proteus.
      *
      * @param string|null $format
      * @throws RuntimeException 
      */
-    public function __construct(string|null $format = null, protected PayloadFormatter $formatter, protected MediaDownloader $downloader)
+    public function __construct(string|null $format = null)
     {
         parent::__construct(
             Config::get('proteus.url'),
@@ -70,10 +71,10 @@ class Proteus extends BaseApiService
      * @return array 
      * @throws Exception
      */
-    public function UploadFile(array $data): array
+    public function uploadFile(array $data): array
     {
         try {
-            $multipartPayload = $this->formatter->prepareMultipart($data);
+            $multipartPayload = $this->prepareMultipart($data);
             return $this->request(method: 'POST', endpoint: 'media', data: $multipartPayload, format: 'multipart');
         } catch (RequestException $e) {
             throw new Exception($e->getMessage());
@@ -98,7 +99,7 @@ class Proteus extends BaseApiService
     public function requestTransformations(string $id_media, array $data): array
     {
         try {
-            return $this->request(method: 'POST', endpoint: 'media/transformations' . $id_media . '/request-transformations', data: $data);
+            return $this->request(method: 'POST', endpoint: 'media/transformations/' . $id_media . '/request-transformations', data: $data);
         } catch (RequestException $e) {
             throw new Exception($e->getMessage());
         }
@@ -125,7 +126,7 @@ class Proteus extends BaseApiService
      * @return array 
      * @throws Exception
      */
-    public function metadataValuesFormKey(string $key): array
+    public function metadataValuesFromKey(string $key): array
     {
         try {
             return $this->request(method: 'GET', endpoint: 'media/metadata/values/' . $key);
@@ -158,8 +159,12 @@ class Proteus extends BaseApiService
      */
     public function metadataStore(string $id, array $data): array
     {
-        $payload = $this->formatter->prepareMultipart($data);
-        return $this->request(method: 'POST', endpoint: 'media/' . $id .'/metadata', data: $payload, format: 'multipart');
+        try {
+            $payload = $this->prepareMultipart($data);
+            return $this->request(method: 'POST', endpoint: 'media/' . $id .'/metadata', data: $payload, format: 'multipart');
+        } catch (RequestException $e) {
+            throw new Exception($e->getMessage());
+        }
     }
 
     /**
@@ -171,8 +176,12 @@ class Proteus extends BaseApiService
      */
     public function metadataUpdate(string $id, array $data): array
     {
-        $payload = $this->formatter->prepareMultipart($data);
-        return $this->request(method: 'POST', endpoint: 'media/' . $id, data: $payload, format: 'multipart');
+        try {
+            $payload = $this->prepareMultipart($data);
+            return $this->request(method: 'POST', endpoint: 'media/' . $id, data: $payload, format: 'multipart');
+        } catch (RequestException $e) {
+            throw new Exception($e->getMessage());
+        }
     }
 
     /**
@@ -350,7 +359,7 @@ class Proteus extends BaseApiService
         int $maxRetries = 3,
         int $retryDelaySeconds = 5
     ): StreamedResponse {
-        return $this->downloader->download($id, $ext, $maxRetries, $retryDelaySeconds);
+        return $this->download($id, $ext, $maxRetries, $retryDelaySeconds);
     }
 
     /**
@@ -372,10 +381,12 @@ class Proteus extends BaseApiService
                     'ext' => $ext
                 ]
             );
-            $stream = $response->getBody();
-            Storage::putStream($id, $stream);
+            
+            $stream = $response->getBody()->detach();
+            
             if (is_resource($stream)) {
-                $stream->close();
+                Storage::putStream($id, $stream);
+                fclose($stream);
             }
         } catch (RequestException $e) {
             throw new Exception('Error al guardar el archivo: ' . $e->getMessage());
@@ -472,16 +483,5 @@ class Proteus extends BaseApiService
     public function formatsConfig(): array
     {
         return (array) Config::get('formats', []);
-    }
-
-    /**
-     * Formatea un metadato usando el formateador interno.
-     * @param string $key
-     * @param mixed  $value
-     * @return array
-     */
-    public function formatMetadata(string $key, mixed $value)
-    {
-        return $this->formatter->formatMetadata($key, $value);
     }
 }
