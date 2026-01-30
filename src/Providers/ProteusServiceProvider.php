@@ -20,7 +20,10 @@ class ProteusServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton(Proteus::class);
+        $this->app->singleton(Proteus::class, function ($app) {
+            return new Proteus();
+        });
+        $this->app->alias(Proteus::class, 'proteus');
     }
 
     /**
@@ -30,8 +33,6 @@ class ProteusServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        $this->app->alias(Proteus::class, 'proteus');
-
         $this->publishes([
             __DIR__ . '/../config/proteus.php' => config_path('proteus.php'),
         ], 'proteus-config');
