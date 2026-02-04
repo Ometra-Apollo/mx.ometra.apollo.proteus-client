@@ -5,11 +5,10 @@ namespace Ometra\Apollo\Proteus;
 use Exception;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Storage;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 use GuzzleHttp\Exception\RequestException;
-use Ometra\Apollo\Proteus\Partials\PayloadFormatting;
 use Ometra\Apollo\Proteus\Partials\DownloadMedia;
-
+use Ometra\Apollo\Proteus\Partials\PayloadFormatting;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 /**
  * Cliente principal para consumir la API de Proteus.
  *

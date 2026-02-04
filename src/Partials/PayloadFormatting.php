@@ -2,8 +2,8 @@
 
 namespace Ometra\Apollo\Proteus\Partials;
 
-use Illuminate\Http\UploadedFile;
 use Exception;
+use Illuminate\Http\UploadedFile;
 
 trait PayloadFormatting
 {

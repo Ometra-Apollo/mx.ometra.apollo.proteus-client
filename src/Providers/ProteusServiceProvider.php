@@ -2,8 +2,8 @@
 
 namespace Ometra\Apollo\Proteus\Providers;
 
-use Illuminate\Support\ServiceProvider;
 use Ometra\Apollo\Proteus\Proteus;
+use Illuminate\Support\ServiceProvider;
 
 /**
  * Service Provider para registrar el cliente de Proteus en Laravel.

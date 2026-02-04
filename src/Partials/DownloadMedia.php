@@ -26,7 +26,6 @@ trait DownloadMedia
 
         do {
             try {
-                // Se asume que requestDownload está disponible en la clase que usa el trait
                 $response = $this->requestDownload(
                     method: 'GET',
                     endpoint: "media/{$id}/download?ext={$extension}",
