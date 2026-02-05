@@ -86,7 +86,7 @@ class Proteus extends BaseApiService
      * @return array 
      * @throws Exception
      */
-    public function mediaDelete(string $id): array
+    public function mediaDelete(string $id): ?array
     {
         try {
             return $this->request(method: 'DELETE', endpoint: 'media' . '/' . $id);
@@ -190,7 +190,7 @@ class Proteus extends BaseApiService
      * @return array 
      * @throws Exception
      */
-    public function metadataDelete(string $id, string $key): array
+    public function metadataDelete(string $id, string $key): ?array
     {
         try {
             return $this->request(method: 'DELETE', endpoint: 'media/' . $id . '/metadata/' . $key);
@@ -248,7 +248,7 @@ class Proteus extends BaseApiService
      * @return array 
      * @throws Exception
      */
-    public function categoryDelete(string $id): array
+    public function categoryDelete(string $id): ?array
     {
         try {
             return $this->request(method: 'DELETE', endpoint: 'categories' . '/' . $id);
@@ -320,7 +320,7 @@ class Proteus extends BaseApiService
      * @return array
      * @throws Exception
      */
-    public function directoryDelete(string $id): array
+    public function directoryDelete(string $id): ?array
     {
         try {
             return $this->request(method: 'DELETE', endpoint: 'directories' . '/' . $id);
@@ -426,7 +426,7 @@ class Proteus extends BaseApiService
      * @param string $preset_id
      * @return array
      */
-    public function presetDelete(string $directory_id, string $preset_id): array
+    public function presetDelete(string $directory_id, string $preset_id): ?array
     {
         try {
             return $this->request(method: 'DELETE', endpoint: 'directories/' . $directory_id . '/presets/' . $preset_id);
