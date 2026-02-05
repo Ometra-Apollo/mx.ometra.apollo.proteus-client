@@ -1,71 +1,109 @@
-## Proteus Client para Laravel
+# Proteus Client for Laravel
 
-Cliente PHP para consumir la API de **Proteus** dentro de aplicaciones **Laravel 10+**.
+A professional PHP client library for integrating Proteus API functionality into Laravel applications (version 11.0 and above).
 
-Expone una clase de servicio (`Proteus`), un **Service Provider** y una **facade**
-para trabajar con media, metadatos, categorías y transformaciones.
+## Overview
 
-### Instalación
+This package provides a comprehensive interface for interacting with the Proteus API, offering seamless integration with Laravel's service container architecture. The library includes a service class (`Proteus`), a dedicated Service Provider, and a Facade for simplified access to media management, metadata operations, category handling, and media transformation capabilities.
 
-- **Requerimientos**
-  - **PHP**: ^8.0  
-  - **Laravel**: ^11.0 o ^12.0
+## Installation
 
-Instala el paquete vía Composer:
+### System Requirements
+
+Ensure your development environment meets the following prerequisites before proceeding with the installation:
+
+- **PHP**: Version 8.0 or higher
+- **Laravel Framework**: Version 11.0 or 12.0
+- **Composer**: Dependency management tool
+- **Proteus API Access**: Valid API endpoint URL and authentication token
+
+### Step 1: Package Installation
+
+Install the package via Composer by executing the following command in your Laravel project root directory:
 
 ```bash
 composer require ometra/proteus-client
 ```
 
-Laravel detectará automáticamente el `ProteusServiceProvider` gracias a la
-configuración en `composer.json`.
+### Step 2: Service Provider Registration
 
-### Publicar configuración
+The `ProteusServiceProvider` will be automatically registered by Laravel's package auto-discovery mechanism, as configured in the package's `composer.json` manifest. Manual registration is not required under normal circumstances.
 
-Publica el archivo de configuración para poder definir la URL y el token:
+If auto-discovery has been disabled in your application, you may register the provider manually by adding it to the `providers` array in `config/app.php`:
+
+```php
+'providers' => [
+    // ...
+    Ometra\Apollo\Proteus\Providers\ProteusServiceProvider::class,
+],
+```
+
+### Step 3: Configuration File Publishing
+
+Publish the package configuration file to enable customization of API endpoints and authentication credentials:
 
 ```bash
 php artisan vendor:publish --tag=proteus-config
 ```
 
-Esto generará el archivo `config/proteus.php` en tu aplicación Laravel.
+This command will generate a `config/proteus.php` file in your Laravel application's configuration directory, containing the package's default configuration values.
 
-### Configuración
+## Configuration
 
-En tu archivo `.env` agrega:
+### Step 4: Environment Variables
+
+Add the following environment variables to your application's `.env` file with the appropriate values for your Proteus API instance:
 
 ```dotenv
-PROTEUS_URL=https://tu-api-proteus.test
-PROTEUS_TOKEN=tu-token-aqui
+PROTEUS_URL=https://your-proteus-api.example.com
+PROTEUS_TOKEN=your_authentication_token_here
 ```
 
-En `config/proteus.php` puedes definir:
+**Important:** Replace the placeholder values with your actual credentials:
+- `PROTEUS_URL`: Your Proteus API base URL endpoint
+- `PROTEUS_TOKEN`: Your Bearer authentication token
 
-- **url**: URL base de la API de Proteus.
-- **token**: Token Bearer para autenticar las peticiones.
-- **transformations**: Transformaciones disponibles.
-- **formats**: Formatos de salida soportados.
+### Step 5: Configuration Verification (Optional)
 
-### Uso básico
+The `config/proteus.php` file published in Step 3 contains the following configuration options:
 
-Puedes usar el cliente vía **inyección de dependencias** o vía **facade**.
+- **url**: Base URL for the Proteus API (sourced from `PROTEUS_URL` environment variable)
+- **token**: Bearer token for API authentication (sourced from `PROTEUS_TOKEN` environment variable)
+- **transformations**: Available transformation presets for media processing operations
+- **formats**: Supported output format specifications
 
-#### Mediante Facade
+You may customize these configuration options to meet your specific requirements by editing the `config/proteus.php` file directly.
+
+### Step 6: Configuration Cache Management
+
+If your Laravel application has configuration caching enabled, clear the cache to ensure the new settings are loaded:
+
+```bash
+php artisan config:clear
+```
+
+The installation and configuration process is now complete. The Proteus client is ready for use in your Laravel application.
+
+## Usage
+
+The Proteus client can be accessed through two primary methods: dependency injection or the Facade pattern.
+
+### Using the Facade
 
 ```php
 use Ometra\Apollo\Proteus\Facades\Proteus;
 
-// Listar media
+// Retrieve paginated media list
 $media = Proteus::mediaIndex([
     'page' => 1,
     'per_page' => 20,
 ]);
 
-// Ver detalle de un media
+// Retrieve specific media details
 $item = Proteus::mediaShow('media-id');
 ```
 
-#### Inyección de dependencias
+### Using Dependency Injection
 
 ```php
 use Ometra\Apollo\Proteus\Proteus;
@@ -81,9 +119,9 @@ class MediaController
 }
 ```
 
-### Subir archivos
+## File Upload Operations
 
-El método `uploadFile` permite enviar archivos y metadatos a un endpoint de la API:
+The `uploadFile` method facilitates the transmission of files and associated metadata to designated API endpoints:
 
 ```php
 use Ometra\Apollo\Proteus\Facades\Proteus;
@@ -101,9 +139,9 @@ $data = [
 $response = Proteus::uploadFile('media/store', $data);
 ```
 
-### Descarga de archivos
+## File Download Operations
 
-Para descargar un media como `StreamedResponse`:
+To download media resources as a `StreamedResponse`:
 
 ```php
 use Ometra\Apollo\Proteus\Facades\Proteus;
@@ -111,8 +149,7 @@ use Ometra\Apollo\Proteus\Facades\Proteus;
 return Proteus::mediaDownload('media-id', 'mp4');
 ```
 
-También puedes guardar el archivo directamente en el storage configurado
-en Laravel:
+Alternatively, media files can be persisted directly to the Laravel configured storage system:
 
 ```php
 use Ometra\Apollo\Proteus\Facades\Proteus;
@@ -120,40 +157,43 @@ use Ometra\Apollo\Proteus\Facades\Proteus;
 Proteus::saveMediaLocal('media-id', 'mi-archivo.mp4');
 ```
 
-### Metadatos y categorías
+## Metadata and Category Management
 
-- **Listar categorías**:
+### Retrieve All Categories
 
 ```php
 $categories = Proteus::categoriesIndex();
 ```
 
-- **Obtener definición de metadatos por clave**:
+### Retrieve Metadata Definition by Key
 
 ```php
 $definition = Proteus::metadataKeys('genre');
 ```
 
-- **Valores posibles para una clave de metadato**:
+### Retrieve Possible Values for Metadata Key
 
 ```php
 $values = Proteus::metadataValuesFormKey('genre');
 ```
 
-### Configuración avanzada
+## Advanced Configuration
 
-Puedes consultar la configuración de transformaciones y formatos
-desde el propio cliente:
+The client provides methods to retrieve transformation and format configuration settings programmatically:
 
 ```php
 use Ometra\Apollo\Proteus\Facades\Proteus;
 
+// Retrieve available transformation configurations
 $transformations = Proteus::transformationsConfig();
+
+// Retrieve supported format specifications
 $formats = Proteus::formatsConfig();
 ```
 
-### Licencia
+## License
 
-Este paquete se distribuye bajo la licencia **MIT**.
+This package is distributed under the MIT License. See the LICENSE file for complete terms and conditions.
 
 
+*
