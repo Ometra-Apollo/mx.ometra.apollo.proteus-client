@@ -9,6 +9,7 @@ use GuzzleHttp\Exception\RequestException;
 use Ometra\Apollo\Proteus\Partials\DownloadMedia;
 use Ometra\Apollo\Proteus\Partials\PayloadFormatting;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+
 /**
  * Cliente principal para consumir la API de Proteus.
  *
@@ -160,7 +161,7 @@ class Proteus extends BaseApiService
     {
         try {
             $payload = $this->prepareMultipart($data);
-            return $this->request(method: 'POST', endpoint: 'media/' . $id .'/metadata', data: $payload, format: 'multipart');
+            return $this->request(method: 'POST', endpoint: 'media/' . $id . '/metadata', data: $payload, format: 'multipart');
         } catch (RequestException $e) {
             throw new Exception($e->getMessage());
         }
@@ -275,10 +276,10 @@ class Proteus extends BaseApiService
      * @return array 
      * @throws Exception
      */
-    public function directoriesIndex(): array
+    public function directoriesIndex(array $data): array
     {
         try {
-            return $this->request(method: 'GET', endpoint: 'directories');
+            return $this->request(method: 'GET', endpoint: 'directories', data: $data);
         } catch (RequestException $e) {
             throw new Exception($e->getMessage());
         }
@@ -380,9 +381,9 @@ class Proteus extends BaseApiService
                     'ext' => $ext
                 ]
             );
-            
+
             $stream = $response->getBody()->detach();
-            
+
             if (is_resource($stream)) {
                 Storage::putStream($id, $stream);
                 fclose($stream);
