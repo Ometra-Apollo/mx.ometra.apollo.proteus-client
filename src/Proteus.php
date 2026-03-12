@@ -44,7 +44,7 @@ class Proteus extends BaseApiService
     public function mediaIndex(array $data): array
     {
         try {
-            return $this->request(method: 'GET', endpoint: 'media', data: $data);
+            return $this->request(method: 'GET', endpoint: 'media', data: $data, format: 'query');
         } catch (RequestException $e) {
             throw new Exception($e->getMessage());
         }
