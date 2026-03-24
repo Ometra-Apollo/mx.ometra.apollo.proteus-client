@@ -28,7 +28,8 @@ trait DownloadMedia
             try {
                 $response = $this->requestDownload(
                     method: 'GET',
-                    endpoint: "media/{$id}/download?ext={$extension}",
+                    endpoint: "media/{$id}/download",
+                    data: $extension ? ['ext' => $extension] : [],
                     format: 'stream'
                 );
 
