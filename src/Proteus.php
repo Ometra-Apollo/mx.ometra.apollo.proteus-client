@@ -129,7 +129,7 @@ class Proteus extends BaseApiService
     public function metadataValuesFromKey(string $key): array
     {
         try {
-            return $this->request(method: 'GET', endpoint: 'media/metadata/values/' . $key);
+            return $this->request(method: 'GET', endpoint: 'media/metadata/' . $key . '/values');
         } catch (RequestException $e) {
             throw new Exception($e->getMessage());
         }
