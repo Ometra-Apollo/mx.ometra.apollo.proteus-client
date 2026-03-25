@@ -6,6 +6,8 @@ use Exception;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Storage;
 use GuzzleHttp\Exception\RequestException;
+use Ometra\Apollo\Proteus\Models\ProteusApp;
+use Ometra\Apollo\Proteus\Services\ProteusContext;
 use Ometra\Apollo\Proteus\Partials\DownloadMedia;
 use Ometra\Apollo\Proteus\Partials\PayloadFormatting;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -23,14 +25,46 @@ class Proteus extends BaseApiService
     /**
      * Crea una nueva instancia del cliente de Proteus.
      *
+     * Puede recibir tenant_id y app_name como parámetros, o usará los del contexto
+     * establecido por el middleware ProteusContextMiddleware.
+     *
+     * @param int|null $tenantId ID del tenant (opcional, usa contexto si no se proporciona)
+     * @param string|null $appName Nombre de la aplicación (opcional, usa contexto si no se proporciona)
      * @param string|null $format
+     * @throws Exception
      * @throws RuntimeException 
      */
-    public function __construct(string|null $format = null)
-    {
+    public function __construct(
+        int|null $tenantId = null,
+        string|null $appName = null,
+        string|null $format = null
+    ) {
+        // Usar los parámetros proporcionados o el contexto
+        $tenantId = $tenantId ?? ProteusContext::getTenantId();
+        $appName = $appName ?? ProteusContext::getAppName();
+        // Si se proporcionan tenant_id y app_name (ya sea por parámetro o contexto), buscar y descifrar el token
+        if ($tenantId != null && $appName != null) {
+            // Buscar la aplicación en la BD
+            $app = ProteusApp::where('tenant_id', $tenantId)
+                ->where('name', ucfirst($appName))
+                ->first();
+
+            if (!$app) {
+                throw new Exception("No se encontró aplicación Proteus para tenant_id={$tenantId} y app_name={$appName}");
+            }
+
+            // Descifrar el token desde el hash almacenado
+            try {
+                $apiToken = ProteusApp::decryptToken($app->hash);
+            } catch (\Exception $e) {
+                throw new Exception("Error al descifrar el token: " . $e->getMessage());
+            }
+        } else {
+            throw new Exception("No se proporcionó tenant_id o app_name, y no se encontró contexto válido.");
+        }
         parent::__construct(
             Config::get('proteus.url'),
-            Config::get('proteus.token'),
+            $apiToken,
             $format
         );
     }

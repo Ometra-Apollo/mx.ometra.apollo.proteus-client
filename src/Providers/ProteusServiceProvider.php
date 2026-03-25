@@ -3,6 +3,8 @@
 namespace Ometra\Apollo\Proteus\Providers;
 
 use Ometra\Apollo\Proteus\Proteus;
+use Ometra\Apollo\Proteus\Commands\StoreProteusAppCommand;
+use Ometra\Apollo\Proteus\Http\Middleware\ProteusContextMiddleware;
 use Illuminate\Support\ServiceProvider;
 
 /**
@@ -36,5 +38,22 @@ class ProteusServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__ . '/../config/proteus.php' => config_path('proteus.php'),
         ], 'proteus-config');
+
+        // Publicar las migraciones
+        $this->publishes([
+            __DIR__ . '/../Database/Migrations' => database_path('migrations'),
+        ], 'proteus-migrations');
+
+        // Registrar comando
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                StoreProteusAppCommand::class,
+            ]);
+        }
+
+        // Registrar alias del middleware
+        if (method_exists($this->app, 'routingMiddleware')) {
+            $this->app->routingMiddleware('proteus.context', ProteusContextMiddleware::class);
+        }
     }
 }
