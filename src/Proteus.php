@@ -46,7 +46,7 @@ class Proteus extends BaseApiService
         if ($tenantId != null && $appName != null) {
             // Buscar la aplicación en la BD
             $app = ProteusApp::where('tenant_id', $tenantId)
-                ->where('name', ucfirst($appName))
+                ->where('name', ucfirst(strlower($appName)))
                 ->first();
 
             if (!$app) {
