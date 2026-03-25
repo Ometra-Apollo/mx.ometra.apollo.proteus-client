@@ -52,7 +52,7 @@ class StoreProteusAppCommand extends Command
             }
 
             // Obtener nombre de la aplicación desde variable de entorno
-            $name = ucfirst(strlower(env('APP_NAME')));
+            $name = ucfirst(strtolower(env('APP_NAME')));
             
             if (empty(trim($name))) {
                 $this->error('La variable de entorno APP_NAME no está configurada.');
