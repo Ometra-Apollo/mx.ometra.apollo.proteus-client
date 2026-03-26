@@ -45,7 +45,8 @@ class ProteusContextMiddleware
             }
         }
         
-        $appName = ucfirst(strtolower(env('APP_NAME', 'default_app')));
+        // Primero intenta PROTEUS_APP_NAME, si no existe usa APP_NAME, sino usa default_app
+        $appName = ucfirst(strtolower(env('PROTEUS_APP_NAME') ?? env('APP_NAME') ?? 'default_app'));
         
         // Si se proporcionan tenant_id y app_name, establecer el contexto
         if ($tenantId && $appName) {
