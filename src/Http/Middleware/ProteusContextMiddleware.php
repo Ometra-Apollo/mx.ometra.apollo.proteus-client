@@ -13,7 +13,7 @@ use Ometra\Apollo\Proteus\Services\ProteusContext;
  * 1. Header X-Tenant-ID
  * 2. Query parameter tenant_id
  * 3. Request attribute tenant_id (establecido por otros middlewares)
- * 4. StaticTenantResolver si está disponible
+ * 4. Resolver configurado en config('bee-hive.resolver') si está disponible
  *
  * Uso en routes:
  * Route::middleware('proteus.context')->group(function () {
@@ -36,12 +36,15 @@ class ProteusContextMiddleware
             ?? $request->query('tenant_id')
             ?? $request->attributes->get('tenant_id');
         
-        // Si aún no hay tenant_id, intentar obtener del StaticTenantResolver
-        if (!$tenantId && class_exists('Equidna\BeeHive\Tenancy\Resolvers\StaticTenantResolver')) {
-            try {
-                $tenantId = app('Equidna\BeeHive\Tenancy\Resolvers\StaticTenantResolver')->resolveTenantId();
-            } catch (\Exception $e) {
-                // Si falla, continuar sin tenant_id
+        // Si aún no hay tenant_id, intentar obtener del resolver configurado
+        if (!$tenantId) {
+            $resolverClass = config('bee-hive.resolver');
+            if ($resolverClass && class_exists($resolverClass)) {
+                try {
+                    $tenantId = app($resolverClass)->resolveTenantId();
+                } catch (\Exception $e) {
+                    // Si falla, continuar sin tenant_id
+                }
             }
         }
         
