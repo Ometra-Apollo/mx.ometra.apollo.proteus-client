@@ -48,20 +48,38 @@ php artisan vendor:publish --tag=proteus-config
 
 This command will generate a `config/proteus.php` file in your Laravel application's configuration directory, containing the package's default configuration values.
 
-## Configuration
-
 ### Step 4: Environment Variables
-
-Add the following environment variables to your application's `.env` file with the appropriate values for your Proteus API instance:
 
 ```dotenv
 PROTEUS_URL=https://your-proteus-api.example.com
-PROTEUS_TOKEN=your_authentication_token_here
+PROTEUS_APP_NAME=my_app
 ```
 
-**Important:** Replace the placeholder values with your actual credentials:
-- `PROTEUS_URL`: Your Proteus API base URL endpoint
-- `PROTEUS_TOKEN`: Your Bearer authentication token
+Notes:
+- `PROTEUS_URL` is the Proteus API base URL.
+- `PROTEUS_APP_NAME` is the app name used to resolve credentials.
+- `APP_NAME` is used as fallback when `PROTEUS_APP_NAME` is missing.
+- `PROTEUS_TOKEN` is still present in `config/proteus.php` for compatibility, but it is not used by the current `Proteus` constructor flow.
+
+### Step 4: Create App Credentials
+Before using the client at runtime, you must create a record in `proteus_apps` with your `tenant_id` and API token.
+
+Run:
+
+```bash
+php artisan proteus:app:store
+```
+
+You can also provide options directly:
+
+```bash
+PROTEUS_APP_NAME="my_app" php artisan proteus:app:store --tenant_id=1 --token="your_plain_token"
+```
+
+Notes:
+- The command asks for `tenant_id` and `token` when not provided.
+- App name is read from `PROTEUS_APP_NAME` (fallback `APP_NAME`).
+- The token is encrypted and stored in `proteus_apps.hash`.
 
 ### Step 5: Configuration Verification (Optional)
 
@@ -74,7 +92,7 @@ The `config/proteus.php` file published in Step 3 contains the following configu
 
 You may customize these configuration options to meet your specific requirements by editing the `config/proteus.php` file directly.
 
-### Step 6: Configuration Cache Management
+### Step 6: Configuration Cache Management (Optional)
 
 If your Laravel application has configuration caching enabled, clear the cache to ensure the new settings are loaded:
 
@@ -83,6 +101,46 @@ php artisan config:clear
 ```
 
 The installation and configuration process is now complete. The Proteus client is ready for use in your Laravel application.
+
+
+### Authentication Flow
+
+The `Ometra\Apollo\Proteus\Proteus` client resolves authentication as follows:
+
+```mermaid
+flowchart TD
+A[Start] --> B[Retrieve tenant_id and app_name]
+B --> C[Query proteus_apps table]
+C --> D{Is there a valid record?}
+D -- No --> E[Throw Exception]
+D -- Yes --> F[Decrypt hash]
+F --> G[Generate Bearer Token]
+G --> H[Make API request]
+H --> I[End]
+```
+
+### Middleware Context (`proteus.context`)
+
+The `ProteusServiceProvider` registers the `proteus.context` middleware alias.
+
+`tenant_id` resolution order:
+1. `X-Tenant-ID` header
+2. `tenant_id` query parameter
+3. `tenant_id` request attribute
+4. `config('bee-hive.resolver')` (if configured and available)
+
+`app_name` resolution order:
+1. `PROTEUS_APP_NAME`
+2. `APP_NAME`
+3. `default_app`
+
+Example route usage:
+
+```php
+Route::middleware('proteus.context')->group(function () {
+    Route::get('/media', [MediaController::class, 'index']);
+});
+```
 
 ## Usage
 
@@ -194,6 +252,3 @@ $formats = Proteus::formatsConfig();
 ## License
 
 This package is distributed under the MIT License. See the LICENSE file for complete terms and conditions.
-
-
-*

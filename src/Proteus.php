@@ -133,7 +133,7 @@ class Proteus extends BaseApiService
     public function requestTransformations(string $id_media, array $data): array
     {
         try {
-            return $this->request(method: 'POST', endpoint: 'media/transformations/' . $id_media . '/request-transformations', data: $data);
+            return $this->request(method: 'POST', endpoint: 'media/' . $id_media . '/request-transformations', data: $data);
         } catch (RequestException $e) {
             throw new Exception($e->getMessage());
         }
@@ -212,7 +212,7 @@ class Proteus extends BaseApiService
     {
         try {
             $payload = $this->prepareMultipart($data);
-            return $this->request(method: 'POST', endpoint: 'media/' . $id, data: $payload, format: 'multipart');
+            return $this->request(method: 'PUT', endpoint: 'media/' . $id . '/metadata', data: $payload, format: 'multipart');
         } catch (RequestException $e) {
             throw new Exception($e->getMessage());
         }
@@ -271,7 +271,7 @@ class Proteus extends BaseApiService
     public function categoryUpdate(string $id, array $data): array
     {
         try {
-            return $this->request(method: 'POST', endpoint: 'categories' . '/' . $id, data: $data);
+            return $this->request(method: 'PUT', endpoint: 'categories' . '/' . $id, data: $data);
         } catch (RequestException $e) {
             throw new Exception($e->getMessage());
         }
@@ -372,7 +372,7 @@ class Proteus extends BaseApiService
     public function directoryUpdate(string $id, array $data): array
     {
         try {
-            return $this->request(method: 'POST', endpoint: 'directories/' . $id, data: $data);
+            return $this->request(method: 'PUT', endpoint: 'directories/' . $id, data: $data);
         } catch (RequestException $e) {
             throw new Exception($e->getMessage());
         }
@@ -380,10 +380,10 @@ class Proteus extends BaseApiService
 
     /**
      * Descarga un media desde Proteuss
-     * @param string      $id                
-     * @param string|null $ext               
-     * @param int         $maxRetries        
-     * @param int         $retryDelaySeconds 
+     * @param string      $id                 
+     * @param string|null $ext                
+     * @param int         $maxRetries         
+     * @param int         $retryDelaySeconds  
      * @return StreamedResponse|\AWS\CRT\HTTP\Response
      * @throws Exception
      */
@@ -400,8 +400,8 @@ class Proteus extends BaseApiService
      * Descarga un media y lo guarda en el sistema de ficheros configurado
      * en Laravel a través del facade `Storage`.
      *
-     * @param string $id       
-     * @param string $filename
+     * @param string $id        
+     * @param string $ext
      * @return void
      * @throws Exception
      */
@@ -429,7 +429,7 @@ class Proteus extends BaseApiService
 
     /**
      * Obtiene la información de preset asociada a un media.
-     * @param string $id 
+     * @param string $directory_id 
      * @return mixed|null
      */
     public function presetIndex(string $directory_id): array
@@ -443,13 +443,14 @@ class Proteus extends BaseApiService
 
     /**
      * Crea un nuevo preset de transformaciones.
+     * @param string $directory_id
      * @param array $data
      * @return array
      */
-    public function presetStore(array $data): array
+    public function presetStore(string $directory_id, array $data): array
     {
         try {
-            return $this->request(method: 'POST', endpoint: 'presets', data: $data);
+            return $this->request(method: 'POST', endpoint: 'directories/' . $directory_id . '/presets', data: $data);
         } catch (RequestException $e) {
             throw new Exception($e->getMessage());
         }
@@ -495,7 +496,7 @@ class Proteus extends BaseApiService
     public function presetUpdate(string $directory_id, string $preset_id, array $data): array
     {
         try {
-            return $this->request(method: 'POST', endpoint: 'directories/' . $directory_id . '/presets/' . $preset_id, data: $data);
+            return $this->request(method: 'PUT', endpoint: 'directories/' . $directory_id . '/presets/' . $preset_id, data: $data);
         } catch (RequestException $e) {
             throw new Exception($e->getMessage());
         }
