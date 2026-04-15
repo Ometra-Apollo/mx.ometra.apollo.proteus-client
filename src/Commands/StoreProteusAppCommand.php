@@ -54,7 +54,7 @@ class StoreProteusAppCommand extends Command
             // Obtener nombre de la aplicación desde variable de entorno
             // Primero intenta PROTEUS_APP_NAME, si no existe usa APP_NAME
             $name = ucfirst(strtolower(env('PROTEUS_APP_NAME') ?? env('APP_NAME')));
-            
+
             if (empty(trim($name))) {
                 $this->error('Las variables de entorno PROTEUS_APP_NAME o APP_NAME no están configuradas.');
                 return self::FAILURE;
@@ -71,12 +71,10 @@ class StoreProteusAppCommand extends Command
                 return self::FAILURE;
             }
 
-            // Verificar si la aplicación ya existe
-            if (ProteusApp::where('name', $name)->exists()) {
-                $this->error("Ya existe una aplicación con el nombre: {$name}");
+            if (ProteusApp::where('tenant_id', $tenantId)->where('name', $name)->exists()) {
+                $this->error("Ya existe una aplicación con el nombre '{$name}' en el tenant {$tenantId}");
                 return self::FAILURE;
             }
-
             // Crear la aplicación con el token proporcionado
             $app = ProteusApp::createApp([
                 'tenant_id' => (int) $tenantId,
