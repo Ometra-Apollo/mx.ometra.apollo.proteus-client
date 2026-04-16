@@ -212,7 +212,6 @@ class Proteus extends BaseApiService
     public function mediaShow(string $id): array
     {
         try {
-            return $this->request(method: 'GET', endpoint: 'media' . '/' . $id);
 
             return [
                 'status' => 200,
