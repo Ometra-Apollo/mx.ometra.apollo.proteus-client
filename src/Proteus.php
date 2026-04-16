@@ -78,7 +78,126 @@ class Proteus extends BaseApiService
     public function mediaIndex(array $data): array
     {
         try {
-            return $this->request(method: 'GET', endpoint: 'media', data: $data, format: 'query');
+            return [
+                'status' => 200,
+                'message' => 'Lista de archivos obtenida con éxito.',
+                'data' => [
+                    [
+                        'id' => '019d9380-2087-716d-ac97-8c5bb9121c83',
+                        'name' => '05 - Deftones - Rickets',
+                        'default_format' => [
+                            'id' => 1,
+                            'format' => 'mp3',
+                            'media_id' => '019d9380-2087-716d-ac97-8c5bb9121c83',
+                            'is_default' => 1,
+                            'status' => 'completed',
+                            'created_at' => '2026-04-15T23:35:55.000000Z',
+                            'updated_at' => '2026-04-15T23:35:55.000000Z'
+                        ],
+                        'size' => 4008681,
+                        'created_at' => '2026-04-15 17:35:40',
+                        'category' => [
+                            'id' => 'other',
+                            'tenant_id' => 1,
+                            'name' => 'Otro'
+                        ],
+                        'type' => 'audio',
+                        'metadata' => [],
+                        'available_formats' => [
+                            [
+                                'id' => 1,
+                                'format' => 'mp3',
+                                'media_id' => '019d9380-2087-716d-ac97-8c5bb9121c83',
+                                'is_default' => 1,
+                                'status' => 'completed',
+                                'created_at' => '2026-04-15T23:35:55.000000Z',
+                                'updated_at' => '2026-04-15T23:35:55.000000Z'
+                            ]
+                        ]
+                    ],
+                    [
+                        'id' => '019d9380-591f-739a-a37c-ec42b2c15886',
+                        'name' => '06 - Deftones - Be Quiet And Drive (Far Away)',
+                        'default_format' => [
+                            'id' => 2,
+                            'format' => 'mp3',
+                            'media_id' => '019d9380-591f-739a-a37c-ec42b2c15886',
+                            'is_default' => 1,
+                            'status' => 'completed',
+                            'created_at' => '2026-04-15T23:36:51.000000Z',
+                            'updated_at' => '2026-04-15T23:36:51.000000Z'
+                        ],
+                        'size' => 7736237,
+                        'created_at' => '2026-04-15 17:35:55',
+                        'category' => [
+                            'id' => 'other',
+                            'tenant_id' => 1,
+                            'name' => 'Otro'
+                        ],
+                        'type' => 'audio',
+                        'metadata' => [],
+                        'available_formats' => [
+                            [
+                                'id' => 2,
+                                'format' => 'mp3',
+                                'media_id' => '019d9380-591f-739a-a37c-ec42b2c15886',
+                                'is_default' => 1,
+                                'status' => 'completed',
+                                'created_at' => '2026-04-15T23:36:51.000000Z',
+                                'updated_at' => '2026-04-15T23:36:51.000000Z'
+                            ]
+                        ]
+                    ],
+                    [
+                        'id' => '019d9381-34e7-7343-a804-fd137130f07e',
+                        'name' => '07 - Deftones - Lotion',
+                        'default_format' => [
+                            'id' => 3,
+                            'format' => 'mp3',
+                            'media_id' => '019d9381-34e7-7343-a804-fd137130f07e',
+                            'is_default' => 1,
+                            'status' => 'completed',
+                            'created_at' => '2026-04-15T23:37:32.000000Z',
+                            'updated_at' => '2026-04-15T23:37:32.000000Z'
+                        ],
+                        'size' => 5723397,
+                        'created_at' => '2026-04-15 17:36:51',
+                        'category' => [
+                            'id' => 'other',
+                            'tenant_id' => 1,
+                            'name' => 'Otro'
+                        ],
+                        'type' => 'audio',
+                        'metadata' => [],
+                        'available_formats' => [
+                            [
+                                'id' => 3,
+                                'format' => 'mp3',
+                                'media_id' => '019d9381-34e7-7343-a804-fd137130f07e',
+                                'is_default' => 1,
+                                'status' => 'completed',
+                                'created_at' => '2026-04-15T23:37:32.000000Z',
+                                'updated_at' => '2026-04-15T23:37:32.000000Z'
+                            ]
+                        ]
+                    ],
+                    [
+                        'id' => '019d9381-d2a3-7176-aad4-9dcdd60a0e8f',
+                        'name' => '08 - Deftones - Dai The Flu',
+                        'default_format' => null,
+                        'size' => 6697264,
+                        'created_at' => '2026-04-15 17:37:32',
+                        'category' => [
+                            'id' => 'other',
+                            'tenant_id' => 1,
+                            'name' => 'Otro'
+                        ],
+                        'type' => 'audio',
+                        'metadata' => [],
+                        'available_formats' => []
+                    ]
+                ]
+            ];
         } catch (RequestException $e) {
             throw new Exception($e->getMessage());
         }
@@ -94,6 +213,56 @@ class Proteus extends BaseApiService
     {
         try {
             return $this->request(method: 'GET', endpoint: 'media' . '/' . $id);
+
+            return [
+                'status' => 200,
+                'message' => 'Archivo obtenido con éxito.',
+                'data' => [
+                    'id' => '019d9380-2087-716d-ac97-8c5bb9121c83',
+                    'name' => '05 - Deftones - Rickets',
+                    'type' => 'audio',
+                    'size' => 4008681,
+                    'checksum' => null,
+                    'created_at' => '2026-04-15T23:35:40.000000Z',
+                    'updated_at' => '2026-04-15T23:35:40.000000Z',
+                    'directory_id' => '4dce229ceba9f76841a63d15bbedc809be0da798',
+                    'category_id' => 'other',
+                    'metadata' => [],
+                    'formats' => [
+                        [
+                            'id' => 1,
+                            'format' => 'mp3',
+                            'media_id' => '019d9380-2087-716d-ac97-8c5bb9121c83',
+                            'is_default' => 1,
+                            'status' => 'completed',
+                            'created_at' => '2026-04-15T23:35:55.000000Z',
+                            'updated_at' => '2026-04-15T23:35:55.000000Z'
+                        ]
+                    ],
+                    'category' => [
+                        'id' => 'other',
+                        'tenant_id' => 1,
+                        'name' => 'Otro'
+                    ],
+                    'default_format' => [
+                        'id' => 1,
+                        'format' => 'mp3',
+                        'media_id' => '019d9380-2087-716d-ac97-8c5bb9121c83',
+                        'is_default' => 1,
+                        'status' => 'completed',
+                        'created_at' => '2026-04-15T23:35:55.000000Z',
+                        'updated_at' => '2026-04-15T23:35:55.000000Z'
+                    ],
+                    'tags' => [],
+                    'logs' => [],
+                    'uploader' => [
+                        'uri_user' => '613557f0e87f4aa51eba7ad544a70711c9d466f4',
+                        'name' => 'Erick Escobar',
+                        'email' => 'eescobar@ometra.mx',
+                        'tenant_id' => null
+                    ]
+                ]
+            ];
         } catch (RequestException $e) {
             throw new Exception($e->getMessage());
         }
@@ -313,7 +482,577 @@ class Proteus extends BaseApiService
     public function directoriesIndex(array $data): array
     {
         try {
-            return $this->request(method: 'GET', endpoint: 'directories', data: $data);
+            return [
+                'status' => 200,
+                'message' => 'Lista de directorios obtenida correctamente.',
+                'data' => [
+                    'directory' => [
+                        'id' => '4dce229ceba9f76841a63d15bbedc809be0da798',
+                        'tenant_id' => 1,
+                        'name' => 'Ignis',
+                        'is_application_directory' => 1,
+                        'is_shareable' => 0,
+                        'parent_id' => null,
+                        'category_id' => null,
+                        'preset_id' => null,
+                        'created_at' => '2026-04-15T23:34:58.000000Z',
+                        'updated_at' => '2026-04-15T23:34:58.000000Z',
+                        'owner_id' => '4dce229ceba9f76841a63d15bbedc809be0da798',
+                        'node_type' => 'user_root',
+                        'items' => [
+                            'current_page' => 1,
+                            'data' => [
+                                [
+                                    'id' => '019d9380-2087-716d-ac97-8c5bb9121c83',
+                                    'name' => '05 - Deftones - Rickets',
+                                    'type' => 'audio',
+                                    'size' => 4008681,
+                                    'checksum' => null,
+                                    'created_at' => '2026-04-15T23:35:40.000000Z',
+                                    'updated_at' => '2026-04-15T23:35:40.000000Z',
+                                    'directory_id' => '4dce229ceba9f76841a63d15bbedc809be0da798',
+                                    'category_id' => 'other',
+                                    'metadata' => [],
+                                    'formats' => [
+                                        [
+                                            'id' => 1,
+                                            'format' => 'mp3',
+                                            'media_id' => '019d9380-2087-716d-ac97-8c5bb9121c83',
+                                            'is_default' => 1,
+                                            'status' => 'completed',
+                                            'created_at' => '2026-04-15T23:35:55.000000Z',
+                                            'updated_at' => '2026-04-15T23:35:55.000000Z'
+                                        ]
+                                    ],
+                                    'category' => [
+                                        'id' => 'other',
+                                        'tenant_id' => 1,
+                                        'name' => 'Otro'
+                                    ],
+                                    'default_format' => [
+                                        'id' => 1,
+                                        'format' => 'mp3',
+                                        'media_id' => '019d9380-2087-716d-ac97-8c5bb9121c83',
+                                        'is_default' => 1,
+                                        'status' => 'completed',
+                                        'created_at' => '2026-04-15T23:35:55.000000Z',
+                                        'updated_at' => '2026-04-15T23:35:55.000000Z'
+                                    ],
+                                    'tags' => [],
+                                    'logs' => [],
+                                    'uploader' => [
+                                        'uri_user' => '613557f0e87f4aa51eba7ad544a70711c9d466f4',
+                                        'name' => 'Erick Escobar',
+                                        'email' => 'eescobar@ometra.mx',
+                                        'tenant_id' => null
+                                    ]
+                                ],
+                                [
+                                    'id' => '019d9380-591f-739a-a37c-ec42b2c15886',
+                                    'name' => '06 - Deftones - Be Quiet And Drive (Far Away)',
+                                    'type' => 'audio',
+                                    'size' => 7736237,
+                                    'checksum' => null,
+                                    'created_at' => '2026-04-15T23:35:55.000000Z',
+                                    'updated_at' => '2026-04-15T23:35:55.000000Z',
+                                    'directory_id' => '4dce229ceba9f76841a63d15bbedc809be0da798',
+                                    'category_id' => 'other',
+                                    'metadata' => [],
+                                    'formats' => [
+                                        [
+                                            'id' => 2,
+                                            'format' => 'mp3',
+                                            'media_id' => '019d9380-591f-739a-a37c-ec42b2c15886',
+                                            'is_default' => 1,
+                                            'status' => 'completed',
+                                            'created_at' => '2026-04-15T23:36:51.000000Z',
+                                            'updated_at' => '2026-04-15T23:36:51.000000Z'
+                                        ]
+                                    ],
+                                    'category' => [
+                                        'id' => 'other',
+                                        'tenant_id' => 1,
+                                        'name' => 'Otro'
+                                    ],
+                                    'default_format' => [
+                                        'id' => 2,
+                                        'format' => 'mp3',
+                                        'media_id' => '019d9380-591f-739a-a37c-ec42b2c15886',
+                                        'is_default' => 1,
+                                        'status' => 'completed',
+                                        'created_at' => '2026-04-15T23:36:51.000000Z',
+                                        'updated_at' => '2026-04-15T23:36:51.000000Z'
+                                    ],
+                                    'tags' => [],
+                                    'logs' => [],
+                                    'uploader' => [
+                                        'uri_user' => '613557f0e87f4aa51eba7ad544a70711c9d466f4',
+                                        'name' => 'Erick Escobar',
+                                        'email' => 'eescobar@ometra.mx',
+                                        'tenant_id' => null
+                                    ]
+                                ],
+                                [
+                                    'id' => '019d9381-34e7-7343-a804-fd137130f07e',
+                                    'name' => '07 - Deftones - Lotion',
+                                    'type' => 'audio',
+                                    'size' => 5723397,
+                                    'checksum' => null,
+                                    'created_at' => '2026-04-15T23:36:51.000000Z',
+                                    'updated_at' => '2026-04-15T23:36:51.000000Z',
+                                    'directory_id' => '4dce229ceba9f76841a63d15bbedc809be0da798',
+                                    'category_id' => 'other',
+                                    'metadata' => [],
+                                    'formats' => [
+                                        [
+                                            'id' => 3,
+                                            'format' => 'mp3',
+                                            'media_id' => '019d9381-34e7-7343-a804-fd137130f07e',
+                                            'is_default' => 1,
+                                            'status' => 'completed',
+                                            'created_at' => '2026-04-15T23:37:32.000000Z',
+                                            'updated_at' => '2026-04-15T23:37:32.000000Z'
+                                        ]
+                                    ],
+                                    'category' => [
+                                        'id' => 'other',
+                                        'tenant_id' => 1,
+                                        'name' => 'Otro'
+                                    ],
+                                    'default_format' => [
+                                        'id' => 3,
+                                        'format' => 'mp3',
+                                        'media_id' => '019d9381-34e7-7343-a804-fd137130f07e',
+                                        'is_default' => 1,
+                                        'status' => 'completed',
+                                        'created_at' => '2026-04-15T23:37:32.000000Z',
+                                        'updated_at' => '2026-04-15T23:37:32.000000Z'
+                                    ],
+                                    'tags' => [],
+                                    'logs' => [],
+                                    'uploader' => [
+                                        'uri_user' => '613557f0e87f4aa51eba7ad544a70711c9d466f4',
+                                        'name' => 'Erick Escobar',
+                                        'email' => 'eescobar@ometra.mx',
+                                        'tenant_id' => null
+                                    ]
+                                ],
+                                [
+                                    'id' => '019d9381-d2a3-7176-aad4-9dcdd60a0e8f',
+                                    'name' => '08 - Deftones - Dai The Flu',
+                                    'type' => 'audio',
+                                    'size' => 6697264,
+                                    'checksum' => null,
+                                    'created_at' => '2026-04-15T23:37:32.000000Z',
+                                    'updated_at' => '2026-04-15T23:37:32.000000Z',
+                                    'directory_id' => '4dce229ceba9f76841a63d15bbedc809be0da798',
+                                    'category_id' => 'other',
+                                    'metadata' => [],
+                                    'formats' => [],
+                                    'category' => [
+                                        'id' => 'other',
+                                        'tenant_id' => 1,
+                                        'name' => 'Otro'
+                                    ],
+                                    'default_format' => null,
+                                    'tags' => [],
+                                    'logs' => [],
+                                    'uploader' => [
+                                        'uri_user' => '613557f0e87f4aa51eba7ad544a70711c9d466f4',
+                                        'name' => 'Erick Escobar',
+                                        'email' => 'eescobar@ometra.mx',
+                                        'tenant_id' => null
+                                    ]
+                                ]
+                            ],
+                            'first_page_url' => 'http://127.0.0.1:8000/api/directories?page=1',
+                            'from' => 1,
+                            'last_page' => 1,
+                            'last_page_url' => 'http://127.0.0.1:8000/api/directories?page=1',
+                            'links' => [
+                                [
+                                    'url' => null,
+                                    'label' => '&laquo; Previous',
+                                    'page' => null,
+                                    'active' => false
+                                ],
+                                [
+                                    'url' => 'http://127.0.0.1:8000/api/directories?page=1',
+                                    'label' => '1',
+                                    'page' => 1,
+                                    'active' => true
+                                ],
+                                [
+                                    'url' => null,
+                                    'label' => 'Next &raquo;',
+                                    'page' => null,
+                                    'active' => false
+                                ]
+                            ],
+                            'next_page_url' => null,
+                            'path' => 'http://127.0.0.1:8000/api/directories',
+                            'per_page' => 10,
+                            'prev_page_url' => null,
+                            'to' => 4,
+                            'total' => 4
+                        ],
+                        'preset' => null,
+                        'media' => [
+                            [
+                                'id' => '019d9380-2087-716d-ac97-8c5bb9121c83',
+                                'name' => '05 - Deftones - Rickets',
+                                'type' => 'audio',
+                                'size' => 4008681,
+                                'checksum' => null,
+                                'created_at' => '2026-04-15T23:35:40.000000Z',
+                                'updated_at' => '2026-04-15T23:35:40.000000Z',
+                                'directory_id' => '4dce229ceba9f76841a63d15bbedc809be0da798',
+                                'category_id' => 'other',
+                                'metadata' => [],
+                                'formats' => [
+                                    [
+                                        'id' => 1,
+                                        'format' => 'mp3',
+                                        'media_id' => '019d9380-2087-716d-ac97-8c5bb9121c83',
+                                        'is_default' => 1,
+                                        'status' => 'completed',
+                                        'created_at' => '2026-04-15T23:35:55.000000Z',
+                                        'updated_at' => '2026-04-15T23:35:55.000000Z'
+                                    ]
+                                ],
+                                'category' => [
+                                    'id' => 'other',
+                                    'tenant_id' => 1,
+                                    'name' => 'Otro'
+                                ],
+                                'default_format' => [
+                                    'id' => 1,
+                                    'format' => 'mp3',
+                                    'media_id' => '019d9380-2087-716d-ac97-8c5bb9121c83',
+                                    'is_default' => 1,
+                                    'status' => 'completed',
+                                    'created_at' => '2026-04-15T23:35:55.000000Z',
+                                    'updated_at' => '2026-04-15T23:35:55.000000Z'
+                                ],
+                                'tags' => [],
+                                'logs' => [],
+                                'uploader' => [
+                                    'uri_user' => '613557f0e87f4aa51eba7ad544a70711c9d466f4',
+                                    'name' => 'Erick Escobar',
+                                    'email' => 'eescobar@ometra.mx',
+                                    'tenant_id' => null
+                                ]
+                            ],
+                            [
+                                'id' => '019d9380-591f-739a-a37c-ec42b2c15886',
+                                'name' => '06 - Deftones - Be Quiet And Drive (Far Away)',
+                                'type' => 'audio',
+                                'size' => 7736237,
+                                'checksum' => null,
+                                'created_at' => '2026-04-15T23:35:55.000000Z',
+                                'updated_at' => '2026-04-15T23:35:55.000000Z',
+                                'directory_id' => '4dce229ceba9f76841a63d15bbedc809be0da798',
+                                'category_id' => 'other',
+                                'metadata' => [],
+                                'formats' => [
+                                    [
+                                        'id' => 2,
+                                        'format' => 'mp3',
+                                        'media_id' => '019d9380-591f-739a-a37c-ec42b2c15886',
+                                        'is_default' => 1,
+                                        'status' => 'completed',
+                                        'created_at' => '2026-04-15T23:36:51.000000Z',
+                                        'updated_at' => '2026-04-15T23:36:51.000000Z'
+                                    ]
+                                ],
+                                'category' => [
+                                    'id' => 'other',
+                                    'tenant_id' => 1,
+                                    'name' => 'Otro'
+                                ],
+                                'default_format' => [
+                                    'id' => 2,
+                                    'format' => 'mp3',
+                                    'media_id' => '019d9380-591f-739a-a37c-ec42b2c15886',
+                                    'is_default' => 1,
+                                    'status' => 'completed',
+                                    'created_at' => '2026-04-15T23:36:51.000000Z',
+                                    'updated_at' => '2026-04-15T23:36:51.000000Z'
+                                ],
+                                'tags' => [],
+                                'logs' => [],
+                                'uploader' => [
+                                    'uri_user' => '613557f0e87f4aa51eba7ad544a70711c9d466f4',
+                                    'name' => 'Erick Escobar',
+                                    'email' => 'eescobar@ometra.mx',
+                                    'tenant_id' => null
+                                ]
+                            ],
+                            [
+                                'id' => '019d9381-34e7-7343-a804-fd137130f07e',
+                                'name' => '07 - Deftones - Lotion',
+                                'type' => 'audio',
+                                'size' => 5723397,
+                                'checksum' => null,
+                                'created_at' => '2026-04-15T23:36:51.000000Z',
+                                'updated_at' => '2026-04-15T23:36:51.000000Z',
+                                'directory_id' => '4dce229ceba9f76841a63d15bbedc809be0da798',
+                                'category_id' => 'other',
+                                'metadata' => [],
+                                'formats' => [
+                                    [
+                                        'id' => 3,
+                                        'format' => 'mp3',
+                                        'media_id' => '019d9381-34e7-7343-a804-fd137130f07e',
+                                        'is_default' => 1,
+                                        'status' => 'completed',
+                                        'created_at' => '2026-04-15T23:37:32.000000Z',
+                                        'updated_at' => '2026-04-15T23:37:32.000000Z'
+                                    ]
+                                ],
+                                'category' => [
+                                    'id' => 'other',
+                                    'tenant_id' => 1,
+                                    'name' => 'Otro'
+                                ],
+                                'default_format' => [
+                                    'id' => 3,
+                                    'format' => 'mp3',
+                                    'media_id' => '019d9381-34e7-7343-a804-fd137130f07e',
+                                    'is_default' => 1,
+                                    'status' => 'completed',
+                                    'created_at' => '2026-04-15T23:37:32.000000Z',
+                                    'updated_at' => '2026-04-15T23:37:32.000000Z'
+                                ],
+                                'tags' => [],
+                                'logs' => [],
+                                'uploader' => [
+                                    'uri_user' => '613557f0e87f4aa51eba7ad544a70711c9d466f4',
+                                    'name' => 'Erick Escobar',
+                                    'email' => 'eescobar@ometra.mx',
+                                    'tenant_id' => null
+                                ]
+                            ],
+                            [
+                                'id' => '019d9381-d2a3-7176-aad4-9dcdd60a0e8f',
+                                'name' => '08 - Deftones - Dai The Flu',
+                                'type' => 'audio',
+                                'size' => 6697264,
+                                'checksum' => null,
+                                'created_at' => '2026-04-15T23:37:32.000000Z',
+                                'updated_at' => '2026-04-15T23:37:32.000000Z',
+                                'directory_id' => '4dce229ceba9f76841a63d15bbedc809be0da798',
+                                'category_id' => 'other',
+                                'metadata' => [],
+                                'formats' => [],
+                                'category' => [
+                                    'id' => 'other',
+                                    'tenant_id' => 1,
+                                    'name' => 'Otro'
+                                ],
+                                'default_format' => null,
+                                'tags' => [],
+                                'logs' => [],
+                                'uploader' => [
+                                    'uri_user' => '613557f0e87f4aa51eba7ad544a70711c9d466f4',
+                                    'name' => 'Erick Escobar',
+                                    'email' => 'eescobar@ometra.mx',
+                                    'tenant_id' => null
+                                ]
+                            ]
+                        ],
+                        'groups' => [],
+                        'tags' => [],
+                        'children' => []
+                    ],
+                    'tags' => [],
+                    'results' => [
+                        [
+                            'id' => '019d9380-2087-716d-ac97-8c5bb9121c83',
+                            'name' => '05 - Deftones - Rickets',
+                            'type' => 'audio',
+                            'size' => 4008681,
+                            'checksum' => null,
+                            'created_at' => '2026-04-15T23:35:40.000000Z',
+                            'updated_at' => '2026-04-15T23:35:40.000000Z',
+                            'directory_id' => '4dce229ceba9f76841a63d15bbedc809be0da798',
+                            'category_id' => 'other',
+                            'metadata' => [],
+                            'formats' => [
+                                [
+                                    'id' => 1,
+                                    'format' => 'mp3',
+                                    'media_id' => '019d9380-2087-716d-ac97-8c5bb9121c83',
+                                    'is_default' => 1,
+                                    'status' => 'completed',
+                                    'created_at' => '2026-04-15T23:35:55.000000Z',
+                                    'updated_at' => '2026-04-15T23:35:55.000000Z'
+                                ]
+                            ],
+                            'category' => [
+                                'id' => 'other',
+                                'tenant_id' => 1,
+                                'name' => 'Otro'
+                            ],
+                            'default_format' => [
+                                'id' => 1,
+                                'format' => 'mp3',
+                                'media_id' => '019d9380-2087-716d-ac97-8c5bb9121c83',
+                                'is_default' => 1,
+                                'status' => 'completed',
+                                'created_at' => '2026-04-15T23:35:55.000000Z',
+                                'updated_at' => '2026-04-15T23:35:55.000000Z'
+                            ],
+                            'tags' => [],
+                            'logs' => [],
+                            'uploader' => [
+                                'uri_user' => '613557f0e87f4aa51eba7ad544a70711c9d466f4',
+                                'name' => 'Erick Escobar',
+                                'email' => 'eescobar@ometra.mx',
+                                'tenant_id' => null
+                            ]
+                        ],
+                        [
+                            'id' => '019d9380-591f-739a-a37c-ec42b2c15886',
+                            'name' => '06 - Deftones - Be Quiet And Drive (Far Away)',
+                            'type' => 'audio',
+                            'size' => 7736237,
+                            'checksum' => null,
+                            'created_at' => '2026-04-15T23:35:55.000000Z',
+                            'updated_at' => '2026-04-15T23:35:55.000000Z',
+                            'directory_id' => '4dce229ceba9f76841a63d15bbedc809be0da798',
+                            'category_id' => 'other',
+                            'metadata' => [],
+                            'formats' => [
+                                [
+                                    'id' => 2,
+                                    'format' => 'mp3',
+                                    'media_id' => '019d9380-591f-739a-a37c-ec42b2c15886',
+                                    'is_default' => 1,
+                                    'status' => 'completed',
+                                    'created_at' => '2026-04-15T23:36:51.000000Z',
+                                    'updated_at' => '2026-04-15T23:36:51.000000Z'
+                                ]
+                            ],
+                            'category' => [
+                                'id' => 'other',
+                                'tenant_id' => 1,
+                                'name' => 'Otro'
+                            ],
+                            'default_format' => [
+                                'id' => 2,
+                                'format' => 'mp3',
+                                'media_id' => '019d9380-591f-739a-a37c-ec42b2c15886',
+                                'is_default' => 1,
+                                'status' => 'completed',
+                                'created_at' => '2026-04-15T23:36:51.000000Z',
+                                'updated_at' => '2026-04-15T23:36:51.000000Z'
+                            ],
+                            'tags' => [],
+                            'logs' => [],
+                            'uploader' => [
+                                'uri_user' => '613557f0e87f4aa51eba7ad544a70711c9d466f4',
+                                'name' => 'Erick Escobar',
+                                'email' => 'eescobar@ometra.mx',
+                                'tenant_id' => null
+                            ]
+                        ],
+                        [
+                            'id' => '019d9381-34e7-7343-a804-fd137130f07e',
+                            'name' => '07 - Deftones - Lotion',
+                            'type' => 'audio',
+                            'size' => 5723397,
+                            'checksum' => null,
+                            'created_at' => '2026-04-15T23:36:51.000000Z',
+                            'updated_at' => '2026-04-15T23:36:51.000000Z',
+                            'directory_id' => '4dce229ceba9f76841a63d15bbedc809be0da798',
+                            'category_id' => 'other',
+                            'metadata' => [],
+                            'formats' => [
+                                [
+                                    'id' => 3,
+                                    'format' => 'mp3',
+                                    'media_id' => '019d9381-34e7-7343-a804-fd137130f07e',
+                                    'is_default' => 1,
+                                    'status' => 'completed',
+                                    'created_at' => '2026-04-15T23:37:32.000000Z',
+                                    'updated_at' => '2026-04-15T23:37:32.000000Z'
+                                ]
+                            ],
+                            'category' => [
+                                'id' => 'other',
+                                'tenant_id' => 1,
+                                'name' => 'Otro'
+                            ],
+                            'default_format' => [
+                                'id' => 3,
+                                'format' => 'mp3',
+                                'media_id' => '019d9381-34e7-7343-a804-fd137130f07e',
+                                'is_default' => 1,
+                                'status' => 'completed',
+                                'created_at' => '2026-04-15T23:37:32.000000Z',
+                                'updated_at' => '2026-04-15T23:37:32.000000Z'
+                            ],
+                            'tags' => [],
+                            'logs' => [],
+                            'uploader' => [
+                                'uri_user' => '613557f0e87f4aa51eba7ad544a70711c9d466f4',
+                                'name' => 'Erick Escobar',
+                                'email' => 'eescobar@ometra.mx',
+                                'tenant_id' => null
+                            ]
+                        ],
+                        [
+                            'id' => '019d9381-d2a3-7176-aad4-9dcdd60a0e8f',
+                            'name' => '08 - Deftones - Dai The Flu',
+                            'type' => 'audio',
+                            'size' => 6697264,
+                            'checksum' => null,
+                            'created_at' => '2026-04-15T23:37:32.000000Z',
+                            'updated_at' => '2026-04-15T23:37:32.000000Z',
+                            'directory_id' => '4dce229ceba9f76841a63d15bbedc809be0da798',
+                            'category_id' => 'other',
+                            'metadata' => [],
+                            'formats' => [],
+                            'category' => [
+                                'id' => 'other',
+                                'tenant_id' => 1,
+                                'name' => 'Otro'
+                            ],
+                            'default_format' => null,
+                            'tags' => [],
+                            'logs' => [],
+                            'uploader' => [
+                                'uri_user' => '613557f0e87f4aa51eba7ad544a70711c9d466f4',
+                                'name' => 'Erick Escobar',
+                                'email' => 'eescobar@ometra.mx',
+                                'tenant_id' => null
+                            ]
+                        ]
+                    ],
+                    'directories' => [],
+                    'metadataKeys' => [
+                        'video' => [
+                            'Título',
+                            'Artista',
+                            'Género',
+                            'Duración (segundos)',
+                            'Duración'
+                        ],
+                        'audio' => [
+                            'Título',
+                            'Artista',
+                            'Álbum',
+                            'Género',
+                            'Año'
+                        ],
+                        'image' => [
+                            'Resolución horizontal',
+                            'Resolución vertical'
+                        ]
+                    ]
+                ]
+            ];
         } catch (RequestException $e) {
             throw new Exception($e->getMessage());
         }
@@ -343,7 +1082,239 @@ class Proteus extends BaseApiService
     public function directoryShow(string $id): array
     {
         try {
-            return $this->request(method: 'GET', endpoint: 'directories' . '/' . $id);
+            return [
+                'status' => 200,
+                'message' => 'Directorio obtenido correctamente.',
+                'data' => [
+                    'directory' => [
+                        'id' => '4dce229ceba9f76841a63d15bbedc809be0da798',
+                        'name' => 'Ignis',
+                        'category_id' => null,
+                        'preset' => null,
+                        'media' => [
+                            [
+                                'id' => '019d9380-2087-716d-ac97-8c5bb9121c83',
+                                'name' => '05 - Deftones - Rickets',
+                                'type' => 'audio',
+                                'size' => 4008681,
+                                'checksum' => null,
+                                'created_at' => '2026-04-15T23:35:40.000000Z',
+                                'updated_at' => '2026-04-15T23:35:40.000000Z',
+                                'directory_id' => '4dce229ceba9f76841a63d15bbedc809be0da798',
+                                'category_id' => 'other',
+                                'metadata' => [],
+                                'formats' => [
+                                    [
+                                        'id' => 1,
+                                        'format' => 'mp3',
+                                        'media_id' => '019d9380-2087-716d-ac97-8c5bb9121c83',
+                                        'is_default' => 1,
+                                        'status' => 'completed',
+                                        'created_at' => '2026-04-15T23:35:55.000000Z',
+                                        'updated_at' => '2026-04-15T23:35:55.000000Z'
+                                    ]
+                                ],
+                                'category' => [
+                                    'id' => 'other',
+                                    'tenant_id' => 1,
+                                    'name' => 'Otro'
+                                ],
+                                'default_format' => [
+                                    'id' => 1,
+                                    'format' => 'mp3',
+                                    'media_id' => '019d9380-2087-716d-ac97-8c5bb9121c83',
+                                    'is_default' => 1,
+                                    'status' => 'completed',
+                                    'created_at' => '2026-04-15T23:35:55.000000Z',
+                                    'updated_at' => '2026-04-15T23:35:55.000000Z'
+                                ],
+                                'tags' => [],
+                                'logs' => [],
+                                'uploader' => [
+                                    'uri_user' => '613557f0e87f4aa51eba7ad544a70711c9d466f4',
+                                    'name' => 'Erick Escobar',
+                                    'email' => 'eescobar@ometra.mx',
+                                    'tenant_id' => null
+                                ]
+                            ],
+                            [
+                                'id' => '019d9380-591f-739a-a37c-ec42b2c15886',
+                                'name' => '06 - Deftones - Be Quiet And Drive (Far Away)',
+                                'type' => 'audio',
+                                'size' => 7736237,
+                                'checksum' => null,
+                                'created_at' => '2026-04-15T23:35:55.000000Z',
+                                'updated_at' => '2026-04-15T23:35:55.000000Z',
+                                'directory_id' => '4dce229ceba9f76841a63d15bbedc809be0da798',
+                                'category_id' => 'other',
+                                'metadata' => [],
+                                'formats' => [
+                                    [
+                                        'id' => 2,
+                                        'format' => 'mp3',
+                                        'media_id' => '019d9380-591f-739a-a37c-ec42b2c15886',
+                                        'is_default' => 1,
+                                        'status' => 'completed',
+                                        'created_at' => '2026-04-15T23:36:51.000000Z',
+                                        'updated_at' => '2026-04-15T23:36:51.000000Z'
+                                    ]
+                                ],
+                                'category' => [
+                                    'id' => 'other',
+                                    'tenant_id' => 1,
+                                    'name' => 'Otro'
+                                ],
+                                'default_format' => [
+                                    'id' => 2,
+                                    'format' => 'mp3',
+                                    'media_id' => '019d9380-591f-739a-a37c-ec42b2c15886',
+                                    'is_default' => 1,
+                                    'status' => 'completed',
+                                    'created_at' => '2026-04-15T23:36:51.000000Z',
+                                    'updated_at' => '2026-04-15T23:36:51.000000Z'
+                                ],
+                                'tags' => [],
+                                'logs' => [],
+                                'uploader' => [
+                                    'uri_user' => '613557f0e87f4aa51eba7ad544a70711c9d466f4',
+                                    'name' => 'Erick Escobar',
+                                    'email' => 'eescobar@ometra.mx',
+                                    'tenant_id' => null
+                                ]
+                            ],
+                            [
+                                'id' => '019d9381-34e7-7343-a804-fd137130f07e',
+                                'name' => '07 - Deftones - Lotion',
+                                'type' => 'audio',
+                                'size' => 5723397,
+                                'checksum' => null,
+                                'created_at' => '2026-04-15T23:36:51.000000Z',
+                                'updated_at' => '2026-04-15T23:36:51.000000Z',
+                                'directory_id' => '4dce229ceba9f76841a63d15bbedc809be0da798',
+                                'category_id' => 'other',
+                                'metadata' => [],
+                                'formats' => [
+                                    [
+                                        'id' => 3,
+                                        'format' => 'mp3',
+                                        'media_id' => '019d9381-34e7-7343-a804-fd137130f07e',
+                                        'is_default' => 1,
+                                        'status' => 'completed',
+                                        'created_at' => '2026-04-15T23:37:32.000000Z',
+                                        'updated_at' => '2026-04-15T23:37:32.000000Z'
+                                    ]
+                                ],
+                                'category' => [
+                                    'id' => 'other',
+                                    'tenant_id' => 1,
+                                    'name' => 'Otro'
+                                ],
+                                'default_format' => [
+                                    'id' => 3,
+                                    'format' => 'mp3',
+                                    'media_id' => '019d9381-34e7-7343-a804-fd137130f07e',
+                                    'is_default' => 1,
+                                    'status' => 'completed',
+                                    'created_at' => '2026-04-15T23:37:32.000000Z',
+                                    'updated_at' => '2026-04-15T23:37:32.000000Z'
+                                ],
+                                'tags' => [],
+                                'logs' => [],
+                                'uploader' => [
+                                    'uri_user' => '613557f0e87f4aa51eba7ad544a70711c9d466f4',
+                                    'name' => 'Erick Escobar',
+                                    'email' => 'eescobar@ometra.mx',
+                                    'tenant_id' => null
+                                ]
+                            ],
+                            [
+                                'id' => '019d9381-d2a3-7176-aad4-9dcdd60a0e8f',
+                                'name' => '08 - Deftones - Dai The Flu',
+                                'type' => 'audio',
+                                'size' => 6697264,
+                                'checksum' => null,
+                                'created_at' => '2026-04-15T23:37:32.000000Z',
+                                'updated_at' => '2026-04-15T23:37:32.000000Z',
+                                'directory_id' => '4dce229ceba9f76841a63d15bbedc809be0da798',
+                                'category_id' => 'other',
+                                'metadata' => [],
+                                'formats' => [],
+                                'category' => [
+                                    'id' => 'other',
+                                    'tenant_id' => 1,
+                                    'name' => 'Otro'
+                                ],
+                                'default_format' => null,
+                                'tags' => [],
+                                'logs' => [],
+                                'uploader' => [
+                                    'uri_user' => '613557f0e87f4aa51eba7ad544a70711c9d466f4',
+                                    'name' => 'Erick Escobar',
+                                    'email' => 'eescobar@ometra.mx',
+                                    'tenant_id' => null
+                                ]
+                            ]
+                        ],
+                        'images_count' => 0,
+                        'videos_count' => 0,
+                        'audios_count' => 4,
+                        'parent_id' => null,
+                        'children' => [],
+                        'tags' => [],
+                        'is_personal' => false,
+                        'is_shareable' => 0,
+                        'groups' => [],
+                        'users' => [],
+                        'groups_count' => 0,
+                        'users_count' => 0,
+                        'metadata' => [],
+                        'metadata_entries' => [],
+                        'is_application_directory' => 1,
+                        'owner' => '',
+                        'node_type' => 'user_root'
+                    ],
+                    'tags' => [],
+                    'breadcrumbs' => [
+                        [
+                            'href' => 'http://127.0.0.1:8000/directories/4dce229ceba9f76841a63d15bbedc809be0da798',
+                            'label' => 'Ignis'
+                        ]
+                    ],
+                    'metadataKeys' => [
+                        'video' => [
+                            'Título',
+                            'Artista',
+                            'Género',
+                            'Duración (segundos)',
+                            'Duración'
+                        ],
+                        'audio' => [
+                            'Título',
+                            'Artista',
+                            'Álbum',
+                            'Género',
+                            'Año'
+                        ],
+                        'image' => [
+                            'Resolución horizontal',
+                            'Resolución vertical'
+                        ]
+                    ],
+                    'permissions' => [
+                        'read' => true,
+                        'write' => true,
+                        'delete' => true,
+                        'share' => false
+                    ],
+                    'categories' => [
+                        [
+                            'id' => 'other',
+                            'tenant_id' => 1,
+                            'name' => 'Otro'
+                        ]
+                    ]
+                ]
+            ];
         } catch (RequestException $e) {
             throw new Exception($e->getMessage());
         }
@@ -358,7 +1329,10 @@ class Proteus extends BaseApiService
     public function directoryDelete(string $id): ?array
     {
         try {
-            return $this->request(method: 'DELETE', endpoint: 'directories' . '/' . $id);
+            return [
+                'status' => 200,
+                'message' => 'Carpeta eliminada correctamente.'
+            ];
         } catch (RequestException $e) {
             throw new Exception($e->getMessage());
         }
