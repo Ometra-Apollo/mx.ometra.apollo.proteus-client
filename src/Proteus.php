@@ -410,6 +410,37 @@ class Proteus extends BaseApiService
     public function categoriesIndex(): array
     {
         try {
+            return [
+                'status' => 200,
+                'message' => 'Lista de categorías obtenida correctamente.',
+                'data' => [
+                    [
+                        'id' => '11',
+                        'slug' => 'advertising',
+                        'name' => 'Publicidad'
+                    ],
+                    [
+                        'id' => '16',
+                        'slug' => 'intern',
+                        'name' => 'Interno'
+                    ],
+                    [
+                        'id' => '1',
+                        'slug' => 'music',
+                        'name' => 'Música'
+                    ],
+                    [
+                        'id' => '6',
+                        'slug' => 'news',
+                        'name' => 'Noticias'
+                    ],
+                    [
+                        'id' => '21',
+                        'slug' => 'other',
+                        'name' => 'Otro'
+                    ]
+                ]
+            ];
             return $this->request(method: 'GET', endpoint: 'categories');
         } catch (RequestException $e) {
             throw new Exception($e->getMessage());
