@@ -9,6 +9,7 @@ use GuzzleHttp\Exception\RequestException;
 use Ometra\Apollo\Proteus\Partials\DownloadMedia;
 use Ometra\Apollo\Proteus\Partials\PayloadFormatting;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Equidna\BeeHive\Tenancy\TenantContext;
 
 /**
  * Cliente principal para consumir la API de Proteus.
@@ -38,10 +39,10 @@ class Proteus extends BaseApiService
         string|null $format = null
     ) {
         // Usar los parámetros proporcionados o el contexto
-        $tenantId = app(\Equidna\BeeHive\Tenancy\TenantContext:class)->get();
-
+        $context = app(TenantContext::class);
+        $tenantId = $context->get();
         // Si se proporcionan tenant_id y app_name (ya sea por parámetro o contexto), buscar y descifrar el token
-        if ($tenantId != null && $appName != null) {
+        if ($tenantId != null) {
 
             try {
                 $apiToken = config('proteus.app_token');
