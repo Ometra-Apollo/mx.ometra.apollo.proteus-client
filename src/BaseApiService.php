@@ -30,7 +30,7 @@ class BaseApiService
      *
      * @throws RuntimeException Si la URL base o el token no están configurados.
      */
-    public function __construct(string $baseUrl, string $token, string|null $format = null)
+    public function __construct(string $baseUrl, string $token, mixed $tenantId = null, string|null $format = null)
     {
         if (empty($baseUrl) || empty($token)) {
             throw new RuntimeException("The base URL or token is not set.");
@@ -45,6 +45,7 @@ class BaseApiService
             'base_uri' => $baseUrl,
             'headers' => [
                 'Authorization' => "Bearer {$token}",
+                'X-Tenant-ID' => $tenantId,
                 'Content-Type' => $contentType,
             ],
         ]);

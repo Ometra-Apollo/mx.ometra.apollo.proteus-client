@@ -66,6 +66,7 @@ class Proteus extends BaseApiService
         parent::__construct(
             Config::get('proteus.url'),
             $apiToken,
+            $tenantId,
             $format
         );
     }
