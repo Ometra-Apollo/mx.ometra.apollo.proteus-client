@@ -38,7 +38,7 @@ class Proteus extends BaseApiService
         string|null $format = null
     ) {
         // Usar los parámetros proporcionados o el contexto
-        $tenantId = app(Equidna\BeeHive\Tenancy\TenantContext:class)->get();
+        $tenantId = app(\Equidna\BeeHive\Tenancy\TenantContext:class)->get();
 
         // Si se proporcionan tenant_id y app_name (ya sea por parámetro o contexto), buscar y descifrar el token
         if ($tenantId != null && $appName != null) {
