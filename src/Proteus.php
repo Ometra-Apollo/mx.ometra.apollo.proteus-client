@@ -6,8 +6,6 @@ use Exception;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Storage;
 use GuzzleHttp\Exception\RequestException;
-use Ometra\Apollo\Proteus\Models\ProteusApp;
-use Ometra\Apollo\Proteus\Services\ProteusContext;
 use Ometra\Apollo\Proteus\Partials\DownloadMedia;
 use Ometra\Apollo\Proteus\Partials\PayloadFormatting;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -40,22 +38,12 @@ class Proteus extends BaseApiService
         string|null $format = null
     ) {
         // Usar los parámetros proporcionados o el contexto
-        $tenantId = $tenantId ?? ProteusContext::getTenantId();
-        $appName = $appName ?? ProteusContext::getAppName();
+        $tenantId = app(Equidna\BeeHive\Tenancy\TenantContext:class)->get();
+
         // Si se proporcionan tenant_id y app_name (ya sea por parámetro o contexto), buscar y descifrar el token
         if ($tenantId != null && $appName != null) {
-            // Buscar la aplicación en la BD
-            // $app = Equidna\Keygen\Models\Application:where('tenant_id', $tenantId)
-            //     ->where('app_name', ucfirst(strtolower($appName)))
-            //     ->first();
 
-            // if (!$app) {
-            //     throw new Exception("No se encontró aplicación Proteus para tenant_id={$tenantId} y app_name={$appName}");
-            // }
-
-            // // Descifrar el token desde el hash almacenado
             try {
-                // $apiToken = ProteusApp::decryptToken($app->hash);
                 $apiToken = config('proteus.app_token');
             } catch (\Exception $e) {
                 throw new Exception("Error al descifrar el token: " . $e->getMessage());

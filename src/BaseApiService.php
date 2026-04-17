@@ -6,6 +6,7 @@ use Exception;
 use RuntimeException;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
+
 /**
  * Class BaseApiService
  *

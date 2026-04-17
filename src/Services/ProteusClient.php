@@ -109,7 +109,7 @@ class ProteusClient
 
         // Add tenant ID if available
         if (ProteusContext::getTenantId()) {
-            $headers['X-Tenant-ID'] = ProteusContext::getTenantId();
+            $headers['X-Tenant-ID'] = app(Equidna\BeeHive\Tenancy\TenantContext:class)->get();
         }
 
         return Http::timeout(config('proteus.timeout', 30))
