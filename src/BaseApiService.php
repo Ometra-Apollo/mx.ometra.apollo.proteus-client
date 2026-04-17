@@ -6,6 +6,7 @@ use Exception;
 use RuntimeException;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
+use Equidna\BeeHive\Tenancy\TenantContext;
 
 /**
  * Class BaseApiService
@@ -94,10 +95,16 @@ class BaseApiService
      */
     protected function requestDownload(string $method, string $endpoint, array $data = [], string $format = 'default')
     {
+
+        $context = app(TenantContext::class);
+        $tenantId = $context->get();
         try {
             $options = [
                 'query' => $data,
                 'stream' => ($format === 'stream'),
+                'headers' => [
+                    'X-Tenant-ID' => $tenantId,
+                ],
             ];
 
             return $this->client->request(
@@ -106,7 +113,7 @@ class BaseApiService
                 options: $options
             );
         } catch (RequestException $e) {
-            throw new Exception("Error de conexión en Proteuss: " . $e->getMessage());
+            throw new Exception("Error de conexión en Proteus: " . $e->getMessage());
         }
     }
 }
