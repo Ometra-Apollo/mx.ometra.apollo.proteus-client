@@ -33,11 +33,8 @@ class Proteus extends BaseApiService
      * @throws Exception
      * @throws RuntimeException 
      */
-    public function __construct(
-        int|null $tenantId = null,
-        string|null $appName = null,
-        string|null $format = null
-    ) {
+    public function __construct()
+    {
         // Usar los parámetros proporcionados o el contexto
         $context = app(TenantContext::class);
         $tenantId = $context->get();
@@ -53,11 +50,9 @@ class Proteus extends BaseApiService
             throw new Exception("No se proporcionó tenant_id o app_name, y no se encontró contexto válido.");
         }
         parent::__construct(
-            Config::get('proteus.url'),
+            Config::get('proteus.base_url'),
             $apiToken,
             $tenantId,
-            $format
-        );
     }
 
     /**
