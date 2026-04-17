@@ -45,17 +45,18 @@ class Proteus extends BaseApiService
         // Si se proporcionan tenant_id y app_name (ya sea por parámetro o contexto), buscar y descifrar el token
         if ($tenantId != null && $appName != null) {
             // Buscar la aplicación en la BD
-            $app = ProteusApp::where('tenant_id', $tenantId)
-                ->where('name', ucfirst(strtolower($appName)))
-                ->first();
+            // $app = Equidna\Keygen\Models\Application:where('tenant_id', $tenantId)
+            //     ->where('app_name', ucfirst(strtolower($appName)))
+            //     ->first();
 
-            if (!$app) {
-                throw new Exception("No se encontró aplicación Proteus para tenant_id={$tenantId} y app_name={$appName}");
-            }
+            // if (!$app) {
+            //     throw new Exception("No se encontró aplicación Proteus para tenant_id={$tenantId} y app_name={$appName}");
+            // }
 
-            // Descifrar el token desde el hash almacenado
+            // // Descifrar el token desde el hash almacenado
             try {
-                $apiToken = ProteusApp::decryptToken($app->hash);
+                // $apiToken = ProteusApp::decryptToken($app->hash);
+                $apiToken = config('proteus.app_token');
             } catch (\Exception $e) {
                 throw new Exception("Error al descifrar el token: " . $e->getMessage());
             }
