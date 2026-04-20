@@ -3,8 +3,6 @@
 namespace Ometra\Apollo\Proteus\Providers;
 
 use Ometra\Apollo\Proteus\Proteus;
-use Ometra\Apollo\Proteus\Commands\StoreProteusAppCommand;
-use Ometra\Apollo\Proteus\Services\ProteusClient;
 use Illuminate\Support\ServiceProvider;
 
 /**
@@ -25,14 +23,11 @@ class ProteusServiceProvider extends ServiceProvider
         // Merge config
         $this->mergeConfigFrom(__DIR__ . '/../config/proteus.php', 'proteus');
 
-        // Legacy Proteus class
         $this->app->singleton(Proteus::class, function ($app) {
             return new Proteus();
         });
         $this->app->alias(Proteus::class, 'proteus');
-
-        // New HTTP client
-        $this->app->singleton(ProteusClient::class);
+        
     }
 
     /**

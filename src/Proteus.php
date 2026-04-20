@@ -9,7 +9,6 @@ use GuzzleHttp\Exception\RequestException;
 use Ometra\Apollo\Proteus\Partials\DownloadMedia;
 use Ometra\Apollo\Proteus\Partials\PayloadFormatting;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-use Equidna\BeeHive\Tenancy\TenantContext;
 
 /**
  * Cliente principal para consumir la API de Proteus.
@@ -35,25 +34,7 @@ class Proteus extends BaseApiService
      */
     public function __construct()
     {
-        // Usar los parámetros proporcionados o el contexto
-        $context = app(TenantContext::class);
-        $tenantId = $context->get();
-        // Si se proporcionan tenant_id y app_name (ya sea por parámetro o contexto), buscar y descifrar el token
-        if ($tenantId != null) {
-
-            try {
-                $apiToken = config('proteus.app_token');
-            } catch (\Exception $e) {
-                throw new Exception("Error al descifrar el token: " . $e->getMessage());
-            }
-        } else {
-            throw new Exception("No se proporcionó tenant_id o app_name, y no se encontró contexto válido.");
-        }
-        parent::__construct(
-            Config::get('proteus.base_url'),
-            $apiToken,
-            $tenantId
-        );
+      //       
     }
 
     /**
@@ -489,21 +470,4 @@ class Proteus extends BaseApiService
         }
     }
 
-    /**
-     * Devuelve la configuración de transformaciones definida en `config/proteus.php`.
-     * @return array
-     */
-    public function transformationsConfig(): array
-    {
-        return (array) Config::get('proteus.transformations', []);
-    }
-
-    /**
-     * Devuelve la configuración de formatos definida en `config/proteus.php`.
-     * @return array
-     */
-    public function formatsConfig(): array
-    {
-        return (array) Config::get('formats', []);
-    }
 }

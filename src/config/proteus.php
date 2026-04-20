@@ -10,7 +10,14 @@ return [
     |
     */
 
-    'base_url' => env('PROTEUS_BASE_URL', 'http://localhost:8000'),
+    'base_url' => env('PROTEUS_BASE_URL'),
+    'context_class' => env('PROTEUS_CONTEXT_CLASS'),
+
+     /**
+      * Si se proporciona un tenant_id específico, se usará ese valor.
+      * De lo contrario, se intentará obtener el tenant_id del contexto actual.
+      * Si no se encuentra ningún tenant_id, se lanzará una excepción.
+      */
 
     /**
      * Token de autenticación para consumir Proteus API

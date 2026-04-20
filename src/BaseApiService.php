@@ -6,7 +6,6 @@ use Exception;
 use RuntimeException;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
-use Equidna\BeeHive\Tenancy\TenantContext;
 
 /**
  * Class BaseApiService
@@ -20,7 +19,6 @@ use Equidna\BeeHive\Tenancy\TenantContext;
 class BaseApiService
 {
     protected Client $client;
-    const CONTENT_TYPE = 'audio/mpeg';
 
     /**
      * Crea una nueva instancia del servicio base para la API.
@@ -32,25 +30,39 @@ class BaseApiService
      *
      * @throws RuntimeException Si la URL base o el token no están configurados.
      */
-    public function __construct(string $baseUrl, string $token, mixed $tenantId = null, string|null $format = null)
+    public function __construct()
     {
-        if (empty($baseUrl) || empty($token)) {
-            throw new RuntimeException("The base URL or token is not set.");
+        $credencials = $this->getCredentials();
+        $this->client = new Client($credencials);
+    }
+
+
+    public function getCredentials(): array
+    {
+        $baseUrl = config('proteus.base_url');
+        if (!$baseUrl) {
+            throw new RuntimeException('Proteus base URL not configured. Set PROTEUS_BASE_URL in environment variables.');
+        }   
+        $contextClass = config('proteus.context_class');
+        $context = app($contextClass);
+        $tenantId = $context->get();
+        if ($tenantId === null) {
+            throw new RuntimeException("Tenant ID not found in context. Please validate the PROTEUS_CONTEXT_CLASS environment variable.");
         }
 
-        if (is_null($format)) {
-            $contentType = 'application/json';
-        } else {
-            $contentType =  self::CONTENT_TYPE;
+        $apiToken = config('proteus.app_token');
+        if ($apiToken == null) {
+            throw new RuntimeException("App token not found in configuration. Please validate the PROTEUS_APP_TOKEN environment variable.");
         }
-        $this->client = new Client([
+
+        return [
             'base_uri' => $baseUrl,
             'headers' => [
-                'Authorization' => "Bearer {$token}",
+                'Authorization' => "Bearer {$apiToken}",
                 'X-Tenant-ID' => $tenantId,
-                'Content-Type' => $contentType,
+                'Content-Type' => 'application/json',
             ],
-        ]);
+        ];
     }
 
     /**
@@ -63,7 +75,7 @@ class BaseApiService
      *
      * @return array Respuesta decodificada en arreglo asociativo.
      *
-     * @throws Exception Si ocurre un error de red o HTTP.
+     * @throws RuntimeException Si ocurre un error de red o HTTP.
      */
     protected function request(string $method, string $endpoint, array $data = [], string $format = 'json')
     {
@@ -74,7 +86,7 @@ class BaseApiService
                 options: [$format => $data]
             );
         } catch (RequestException $e) {
-            throw new Exception($e->getMessage());
+            throw new RuntimeException($e->getMessage());
         }
 
         return json_decode($response->getBody(), true);
@@ -91,13 +103,18 @@ class BaseApiService
      *
      * @return \Psr\Http\Message\ResponseInterface Respuesta cruda de Guzzle.
      *
-     * @throws Exception Si ocurre un error de red o HTTP.
+     * @throws RuntimeException Si ocurre un error de red o HTTP.
      */
     protected function requestDownload(string $method, string $endpoint, array $data = [], string $format = 'default')
     {
 
-        $context = app(TenantContext::class);
+        $contextClass = config('proteus.context_class');
+        $context = app($contextClass);
         $tenantId = $context->get();
+        if ($tenantId === null) {
+            throw new RuntimeException("Tenant ID not found in context. Please validate the PROTEUS_CONTEXT_CLASS environment variable.");
+        }
+        
         try {
             $options = [
                 'query' => $data,
@@ -113,7 +130,7 @@ class BaseApiService
                 options: $options
             );
         } catch (RequestException $e) {
-            throw new Exception("Error de conexión en Proteus: " . $e->getMessage());
+            throw new RuntimeException("Error de conexión en Proteus: " . $e->getMessage());
         }
     }
 }
