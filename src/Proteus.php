@@ -34,7 +34,7 @@ class Proteus extends BaseApiService
      */
     public function __construct()
     {
-      //       
+      parent::__construct();
     }
 
     /**
