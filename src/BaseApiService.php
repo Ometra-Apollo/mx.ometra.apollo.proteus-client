@@ -18,7 +18,7 @@ use GuzzleHttp\Exception\RequestException;
  */
 class BaseApiService
 {
-    protected Client $client;
+    protected ?Client $client = null;
 
     /**
      * Crea una nueva instancia del servicio base para la API.
@@ -32,8 +32,12 @@ class BaseApiService
      */
     public function __construct()
     {
-        $credencials = $this->getCredentials();
-        $this->client = new Client($credencials);
+        try {
+            $credencials = $this->getCredentials();
+            $this->client = new Client($credencials);
+        } catch (Exception $e) {
+            throw new RuntimeException('Error initializing Proteus client: ' . $e->getMessage());
+        }
     }
 
 
@@ -44,6 +48,9 @@ class BaseApiService
             throw new RuntimeException('Proteus base URL not configured. Set PROTEUS_BASE_URL in environment variables.');
         }   
         $contextClass = config('proteus.context_class');
+        if(!$contextClass) {
+            throw new RuntimeException('Proteus context class not configured. Set PROTEUS_CONTEXT_CLASS in environment variables.');
+        }
         $context = app($contextClass);
         $tenantId = $context->get();
         if ($tenantId === null) {
