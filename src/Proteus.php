@@ -2,472 +2,117 @@
 
 namespace Ometra\Apollo\Proteus;
 
-use Exception;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Storage;
-use GuzzleHttp\Exception\RequestException;
-use Ometra\Apollo\Proteus\Partials\DownloadMedia;
-use Ometra\Apollo\Proteus\Partials\PayloadFormatting;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use BadMethodCallException;
+use Ometra\Apollo\Proteus\Api\MediaApi;
+use Ometra\Apollo\Proteus\Api\PresetsApi;
+use Ometra\Apollo\Proteus\Api\MetadataApi;
+use Ometra\Apollo\Proteus\Api\CategoriesApi;
+use Ometra\Apollo\Proteus\Api\DirectoriesApi;
 
 /**
  * Cliente principal para consumir la API de Proteus.
  *
- * Esta clase expone métodos de alto nivel para gestionar media,
- * categorías, metadatos y transformaciones a través de la API.
+ * @method array mediaIndex(array $data)
+ * @method array mediaShow(string $id)
+ * @method array uploadFile(array $data)
+ * @method array|null mediaDelete(string $id)
+ * @method array requestTransformations(string $id_media, array $data)
+ * @method array mediaDownload(string $id, ?string $ext = null)
+ * @method array saveMediaLocal(string $id, string $ext)
+ * @method array metadataKeys(string $key)
+ * @method array metadataValuesFromKey(string $key)
+ * @method array metadataShow(string $id, string $key)
+ * @method array metadataStore(string $id, array $data)
+ * @method array metadataUpdate(string $id, array $data)
+ * @method array|null metadataDelete(string $id, string $key)
+ * @method array categoriesIndex()
+ * @method array categoryStore(array $data)
+ * @method array categoryUpdate(string $id, array $data)
+ * @method array|null categoryDelete(string $id)
+ * @method array categoryShow(string $id)
+ * @method array directoriesIndex(array $data)
+ * @method array directoryStore(array $data)
+ * @method array directoryShow(string $id)
+ * @method array|null directoryDelete(string $id)
+ * @method array directoryUpdate(string $id, array $data)
+ * @method array presetIndex(string $directory_id)
+ * @method array presetStore(string $directory_id, array $data)
+ * @method array|null presetDelete(string $directory_id, string $preset_id)
+ * @method array presetShow(string $directory_id, string $preset_id)
+ * @method array presetUpdate(string $directory_id, string $preset_id, array $data)
  */
-class Proteus extends BaseApiService
+class Proteus
 {
-    use PayloadFormatting, DownloadMedia;
-
     /**
-     * Crea una nueva instancia del cliente de Proteus.
-     *
-     * Puede recibir tenant_id y app_name como parámetros, o usará los del contexto
-     * establecido por el middleware ProteusContextMiddleware.
-     *
-     * @param int|null $tenantId ID del tenant (opcional, usa contexto si no se proporciona)
-     * @param string|null $appName Nombre de la aplicación (opcional, usa contexto si no se proporciona)
-     * @param string|null $format
-     * @throws Exception
-     * @throws RuntimeException 
+     * @var array<int, object>
      */
-    public function __construct()
-    {
-      parent::__construct();
+    private array $scopes;
+
+    private MediaApi $mediaApi;
+
+    private MetadataApi $metadataApi;
+
+    private CategoriesApi $categoriesApi;
+
+    private DirectoriesApi $directoriesApi;
+
+    private PresetsApi $presetsApi;
+
+    public function __construct(
+        ?MediaApi $mediaApi = null,
+        ?MetadataApi $metadataApi = null,
+        ?CategoriesApi $categoriesApi = null,
+        ?DirectoriesApi $directoriesApi = null,
+        ?PresetsApi $presetsApi = null,
+    ) {
+        $this->mediaApi = $mediaApi ?? app(MediaApi::class);
+        $this->metadataApi = $metadataApi ?? app(MetadataApi::class);
+        $this->categoriesApi = $categoriesApi ?? app(CategoriesApi::class);
+        $this->directoriesApi = $directoriesApi ?? app(DirectoriesApi::class);
+        $this->presetsApi = $presetsApi ?? app(PresetsApi::class);
+
+        $this->scopes = [
+            $this->mediaApi,
+            $this->metadataApi,
+            $this->categoriesApi,
+            $this->directoriesApi,
+            $this->presetsApi,
+        ];
     }
 
-    /**
-     * Obtiene un listado de media desde Proteus.
-     * @param array $data 
-     * @return array 
-     * @throws Exception
-     */
-    public function mediaIndex(array $data): array
+    public function media(): MediaApi
     {
-        try {
-            return $this->request(method: 'GET', endpoint: 'media', data: $data, format: 'query');
-        } catch (RequestException $e) {
-            throw new Exception($e->getMessage());
-        }
+        return $this->mediaApi;
     }
 
-    /**
-     * Obtiene el detalle de un media por su identificador.
-     * @param string $id 
-     * @return array 
-     * @throws Exception
-     */
-    public function mediaShow(string $id): array
+    public function metadata(): MetadataApi
     {
-        try {
-            return $this->request(method: 'GET', endpoint: 'media' . '/' . $id);
-        } catch (RequestException $e) {
-            throw new Exception($e->getMessage());
-        }
+        return $this->metadataApi;
     }
 
-    /**
-     * Crea un nuevo registro de media.
-     * @param array $data 
-     * @return array 
-     * @throws Exception
-     */
-    public function uploadFile(array $data): array
+    public function categories(): CategoriesApi
     {
-        try {
-            $multipartPayload = $this->prepareMultipart($data);
-            return $this->request(method: 'POST', endpoint: 'media', data: $multipartPayload, format: 'multipart');
-        } catch (RequestException $e) {
-            throw new Exception($e->getMessage());
-        }
+        return $this->categoriesApi;
     }
 
-    /**
-     * Elimina un media por su identificador.
-     * @param string $id 
-     * @return array 
-     * @throws Exception
-     */
-    public function mediaDelete(string $id): ?array
+    public function directories(): DirectoriesApi
     {
-        try {
-            return $this->request(method: 'DELETE', endpoint: 'media' . '/' . $id);
-        } catch (RequestException $e) {
-            throw new Exception($e->getMessage());
-        }
+        return $this->directoriesApi;
     }
 
-    public function requestTransformations(string $id_media, array $data): array
+    public function presets(): PresetsApi
     {
-        try {
-            return $this->request(method: 'POST', endpoint: 'media/' . $id_media . '/request-transformations', data: $data);
-        } catch (RequestException $e) {
-            throw new Exception($e->getMessage());
-        }
+        return $this->presetsApi;
     }
 
-    /**
-     * Obtiene las claves de metadatos disponibles en Proteus.
-     * @param string $key
-     * @return array
-     * @throws Exception
-     */
-    public function metadataKeys(string $key): array
+    public function __call(string $method, array $arguments): mixed
     {
-        try {
-            return $this->request(method: 'GET', endpoint: 'media/metadata' . '/' . $key);
-        } catch (RequestException $e) {
-            throw new Exception($e->getMessage());
-        }
-    }
-
-    /**
-     * Obtiene los valores asociados a una clave de metadato.
-     * @param string $key 
-     * @return array 
-     * @throws Exception
-     */
-    public function metadataValuesFromKey(string $key): array
-    {
-        try {
-            return $this->request(method: 'GET', endpoint: 'media/metadata/' . $key . '/values');
-        } catch (RequestException $e) {
-            throw new Exception($e->getMessage());
-        }
-    }
-
-    /**
-     * Obtiene los metadatos asociados a un media por su identificador.
-     * @param string $id 
-     * @return array 
-     * @throws Exception
-     */
-    public function metadataShow(string $id, string $key): array
-    {
-        try {
-            return $this->request(method: 'GET', endpoint: 'media/' . $id . '/metadata/' . $key);
-        } catch (RequestException $e) {
-            throw new Exception($e->getMessage());
-        }
-    }
-
-    /**
-     * Crea nuevos metadatos para un media.
-     * @param string $id   
-     * @param array  $data 
-     * @return array
-     * @throws Exception
-     */
-    public function metadataStore(string $id, array $data): array
-    {
-        try {
-            $payload = $this->prepareMultipart($data);
-            return $this->request(method: 'POST', endpoint: 'media/' . $id . '/metadata', data: $payload, format: 'multipart');
-        } catch (RequestException $e) {
-            throw new Exception($e->getMessage());
-        }
-    }
-
-    /**
-     * Actualiza los metadatos de un media.
-     * @param string $id   
-     * @param array  $data 
-     * @return array
-     * @throws Exception
-     */
-    public function metadataUpdate(string $id, array $data): array
-    {
-        try {
-            $payload = $this->prepareMultipart($data);
-            return $this->request(method: 'PUT', endpoint: 'media/' . $id . '/metadata', data: $payload, format: 'multipart');
-        } catch (RequestException $e) {
-            throw new Exception($e->getMessage());
-        }
-    }
-
-    /**
-     * Elimina un metadato específico de un media.
-     * @param string $id  
-     * @param string $key 
-     * @return array 
-     * @throws Exception
-     */
-    public function metadataDelete(string $id, string $key): ?array
-    {
-        try {
-            return $this->request(method: 'DELETE', endpoint: 'media/' . $id . '/metadata/' . $key);
-        } catch (RequestException $e) {
-            throw new Exception($e->getMessage());
-        }
-    }
-
-    /**
-     * Obtiene el listado de categorías disponibles en Proteus.
-     * @return array 
-     * @throws Exception
-     */
-    public function categoriesIndex(): array
-    {
-        try {
-            return $this->request(method: 'GET', endpoint: 'categories');
-        } catch (RequestException $e) {
-            throw new Exception($e->getMessage());
-        }
-    }
-
-    /**
-     * Crea una nueva categoría.
-     * @param array $data
-     * @return array
-     */
-    public function categoryStore(array $data): array
-    {
-        try {
-            return $this->request(method: 'POST', endpoint: 'categories', data: $data);
-        } catch (RequestException $e) {
-            throw new Exception($e->getMessage());
-        }
-    }
-
-    /**
-     * Actualiza una categoría existente.
-     * @param string $id
-     * @param array  $data
-     * @return array
-     */
-    public function categoryUpdate(string $id, array $data): array
-    {
-        try {
-            return $this->request(method: 'PUT', endpoint: 'categories' . '/' . $id, data: $data);
-        } catch (RequestException $e) {
-            throw new Exception($e->getMessage());
-        }
-    }
-
-    /**
-     * Elimina una categoría por su identificador.
-     * @param string $id 
-     * @return array 
-     * @throws Exception
-     */
-    public function categoryDelete(string $id): ?array
-    {
-        try {
-            return $this->request(method: 'DELETE', endpoint: 'categories' . '/' . $id);
-        } catch (RequestException $e) {
-            throw new Exception($e->getMessage());
-        }
-    }
-
-    /**
-     * Obtiene el detalle de una categoría por su identificador.
-     * @param string $id 
-     */
-    public function categoryShow(string $id): array
-    {
-        try {
-            return $this->request(method: 'GET', endpoint: 'categories' . '/' . $id);
-        } catch (RequestException $e) {
-            throw new Exception($e->getMessage());
-        }
-    }
-
-    /**
-     * Obtiene el listado de los directorios
-     * @return array 
-     * @throws Exception
-     */
-    public function directoriesIndex(array $data): array
-    {
-        try {
-            return $this->request(method: 'GET', endpoint: 'directories', data: $data);
-        } catch (RequestException $e) {
-            throw new Exception($e->getMessage());
-        }
-    }
-
-    /**
-     * Crea un nuevo directorio en Proteus.
-     * @param array $data 
-     * @return array 
-     * @throws Exception
-     */
-    public function directoryStore(array $data): array
-    {
-        try {
-            return $this->request(method: 'POST', endpoint: 'directories', data: $data);
-        } catch (RequestException $e) {
-            throw new Exception($e->getMessage());
-        }
-    }
-
-    /**
-     * Obtiene el detalle de un directorio por su identificador.
-     * @param string $id
-     * @return array 
-     * @throws Exception
-     */
-    public function directoryShow(string $id): array
-    {
-        try {
-            return $this->request(method: 'GET', endpoint: 'directories' . '/' . $id);
-        } catch (RequestException $e) {
-            throw new Exception($e->getMessage());
-        }
-    }
-
-    /**
-     * Elimina un directorio por su identificador.
-     * @param string $id 
-     * @return array
-     * @throws Exception
-     */
-    public function directoryDelete(string $id): ?array
-    {
-        try {
-            return $this->request(method: 'DELETE', endpoint: 'directories' . '/' . $id);
-        } catch (RequestException $e) {
-            throw new Exception($e->getMessage());
-        }
-    }
-
-    /**
-     * Actualiza los datos de un directorio.
-     * @param string $id Identificador del directorio.
-     * @param array $data Datos a actualizar.
-     */
-    public function directoryUpdate(string $id, array $data): array
-    {
-        try {
-            return $this->request(method: 'PUT', endpoint: 'directories/' . $id, data: $data);
-        } catch (RequestException $e) {
-            throw new Exception($e->getMessage());
-        }
-    }
-
-    /**
-     * Descarga un media desde Proteuss
-     * @param string      $id                 
-     * @param string|null $ext                
-     * @param int         $maxRetries         
-     * @param int         $retryDelaySeconds  
-     * @return StreamedResponse|\AWS\CRT\HTTP\Response
-     * @throws Exception
-     */
-    public function mediaDownload(
-        string $id,
-        ?string $ext = null,
-        int $maxRetries = 3,
-        int $retryDelaySeconds = 5
-    ): StreamedResponse {
-        return $this->download($id, $ext, $maxRetries, $retryDelaySeconds);
-    }
-
-    /**
-     * Descarga un media y lo guarda en el sistema de ficheros configurado
-     * en Laravel a través del facade `Storage`.
-     *
-     * @param string $id        
-     * @param string $ext
-     * @return void
-     * @throws Exception
-     */
-    public function saveMediaLocal(string $id, string $ext): void
-    {
-        try {
-            $response = $this->requestDownload(
-                method: 'GET',
-                endpoint: 'media/' . $id . '/download',
-                data: [
-                    'ext' => $ext
-                ]
-            );
-
-            $stream = $response->getBody()->detach();
-
-            if (is_resource($stream)) {
-                Storage::putStream($id, $stream);
-                fclose($stream);
+        foreach ($this->scopes as $scope) {
+            if (method_exists($scope, $method)) {
+                return $scope->{$method}(...$arguments);
             }
-        } catch (RequestException $e) {
-            throw new Exception('Error al guardar el archivo: ' . $e->getMessage());
         }
-    }
 
-    /**
-     * Obtiene la información de preset asociada a un media.
-     * @param string $directory_id 
-     * @return mixed|null
-     */
-    public function presetIndex(string $directory_id): array
-    {
-        try {
-            return $this->request(method: 'GET', endpoint: 'directories/' . $directory_id . '/presets');
-        } catch (RequestException $e) {
-            throw new Exception($e->getMessage());
-        }
+        throw new BadMethodCallException(sprintf('Method [%s] does not exist on Proteus.', $method));
     }
-
-    /**
-     * Crea un nuevo preset de transformaciones.
-     * @param string $directory_id
-     * @param array $data
-     * @return array
-     */
-    public function presetStore(string $directory_id, array $data): array
-    {
-        try {
-            return $this->request(method: 'POST', endpoint: 'directories/' . $directory_id . '/presets', data: $data);
-        } catch (RequestException $e) {
-            throw new Exception($e->getMessage());
-        }
-    }
-
-    /**
-     * Elimina un preset de transformaciones.
-     * @param string $directory_id
-     * @param string $preset_id
-     * @return array
-     */
-    public function presetDelete(string $directory_id, string $preset_id): ?array
-    {
-        try {
-            return $this->request(method: 'DELETE', endpoint: 'directories/' . $directory_id . '/presets/' . $preset_id);
-        } catch (RequestException $e) {
-            throw new Exception($e->getMessage());
-        }
-    }
-
-    /**
-     * Obtiene el detalle de un preset de transformaciones.
-     * @param string $directory_id
-     * @param string $preset_id
-     * @return array
-     */
-    public function presetShow(string $directory_id, string $preset_id): array
-    {
-        try {
-            return $this->request(method: 'GET', endpoint: 'directories/' . $directory_id . '/presets/' . $preset_id);
-        } catch (RequestException $e) {
-            throw new Exception($e->getMessage());
-        }
-    }
-
-    /**
-     * Actualiza un preset de transformaciones.
-     * @param string $directory_id
-     * @param string $preset_id
-     * @param array  $data
-     * @return array
-     */
-    public function presetUpdate(string $directory_id, string $preset_id, array $data): array
-    {
-        try {
-            return $this->request(method: 'PUT', endpoint: 'directories/' . $directory_id . '/presets/' . $preset_id, data: $data);
-        } catch (RequestException $e) {
-            throw new Exception($e->getMessage());
-        }
-    }
-
 }
